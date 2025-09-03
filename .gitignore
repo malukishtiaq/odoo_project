@@ -1,0 +1,48 @@
+# Odoo Project Gitignore
+
+# Large database files
+*.sql
+*.zip
+*.tar.gz
+
+# Database data directories
+db-data/
+odoo-data/
+filestore/
+
+# Odoo core (too large)
+odoo-18/
+
+# Embedded git repositories
+custom_modules/*/
+
+# System files
+.DS_Store
+.history/
+Thumbs.db
+
+# Docker volumes
+docker-data/
+
+# Log files
+*.log
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment files
+.env
+.env.local
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.temp
