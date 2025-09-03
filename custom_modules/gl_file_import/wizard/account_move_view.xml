@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_xlsx_upload_wizard" model="ir.ui.view">
+        <field name="name">je.import.wizard.form</field>
+        <field name="model">je.import.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Upload XLSX File">
+                <group>
+                    <field name="file" filename="filename"/>
+                    <field name="filename" readonly="1"/>
+                </group>
+                <footer>
+                    <button string="Import" type="object" name="action_process_file" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_xlsx_upload_wizard" model="ir.actions.act_window">
+        <field name="name">Import XLSX</field>
+        <field name="res_model">je.import.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_xlsx_upload_gl" name="Import XLSX File"
+              parent="account.menu_finance_entries" sequence="5"
+              action="action_xlsx_upload_wizard"/>
+</odoo>

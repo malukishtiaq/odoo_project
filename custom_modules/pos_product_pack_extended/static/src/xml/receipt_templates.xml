@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_product_pack_extended.Orderline" t-inherit="point_of_sale.Orderline" t-inherit-mode="extension">
+        <xpath expr="//li" position="attributes">
+            <attribute name="t-if">!line.is_component</attribute>
+        </xpath>
+        <xpath expr="//div[@class='product-name d-inline-block flex-grow-1 fw-bolder pe-1 text-truncate']" position="replace">
+            <div class="product-name d-inline-block flex-grow-1 fw-bolder pe-1 text-truncate">
+<!--                <h2 t-esc="props.line.is_component"/>-->
+                <span t-if="!props.line.is_component">
+                    <t t-esc="props.line.productName"/>
+                </span>
+                <span t-else="">
+                    <t t-esc="props.line.productName"/> <span class="text-muted">(Component)</span>
+                </span>
+
+                <!-- Lot icon handling -->
+<!--                <t t-if="props.line.tracking !== 'none'">-->
+<!--                    <t t-if="props.line.has_valid_product_lot">-->
+<!--                        <i class="fa fa-list text-success ms-1" title="Valid lot/serial"/>-->
+<!--                    </t>-->
+<!--                    <t t-else="">-->
+<!--                        <i class="fa fa-list text-danger ms-1" title="Invalid lot/serial"/>-->
+<!--                    </t>-->
+<!--                </t>-->
+
+<!--                <t t-slot="product-name"/>-->
+            </div>
+        </xpath>
+
+        <!-- Override price display -->
+        <xpath expr="//div[@class='product-price price fw-bolder']" position="replace">
+            <div class="product-price price fw-bolder">
+                <t t-if="props.line.is_component">
+                    <span>-</span>
+                </t>
+                <t t-elif="props.line.price === 'free'">Free</t>
+                <t t-else="">
+                    <t t-esc="props.line.price"/>
+                </t>
+            </div>
+        </xpath>
+
+        <!-- Override price per unit -->
+<!--        <xpath expr="//li[@class='price-per-unit']" position="replace">-->
+<!--            <li class="price-per-unit">-->
+<!--                <t t-if="!props.line.is_component">-->
+<!--                    <span class="qty px-1 border rounded text-bg-view fw-bolder me-1">-->
+<!--                        <t t-esc="props.line.qty"/>-->
+<!--                        <t t-if="props.line.unit and props.line.unit !== 'Units'">-->
+<!--                            <t t-esc="props.line.unit"/>-->
+<!--                        </t>-->
+<!--                    </span>-->
+<!--                    <t t-if="!props.basic_receipt">-->
+<!--                        x-->
+<!--                        <t t-if="props.line.price !== 0">-->
+<!--                            <s t-esc="props.line.oldUnitPrice" t-if="props.line.oldUnitPrice"/>-->
+<!--                            <t t-esc="props.line.unitPrice"/>-->
+<!--                        </t>-->
+<!--                    </t>-->
+<!--                    <t t-if="props.line.unit">/ <t t-esc="props.line.unit"/></t>-->
+<!--                </t>-->
+<!--            </li>-->
+<!--        </xpath>-->
+
+        <!-- Override discount info -->
+        <xpath expr="//ul[contains(@class, 'info-list')]/li[2]" position="attributes">
+            <attribute name="t-if">!line.is_component and line.price !== 0 and line.discount and line.discount !== '0' and !props.basic_receipt</attribute>
+        </xpath>
+
+
+        <!-- Add Customer Note -->
+        <xpath expr="//li[@class='customer-note w-100 p-2 mt-2 rounded text-break text-bg-warning bg-opacity-25']" position="replace">
+            <li t-if="props.line.customerNote" class="customer-note w-100 p-2 mt-2 rounded text-break text-bg-warning bg-opacity-25">
+                <i class="fa fa-sticky-note me-1" role="img" aria-label="Customer Note" title="Customer Note"/>
+                <t t-esc="props.line.customerNote"/>
+            </li>
+        </xpath>
+
+        <!-- Add Lot Lines (Serial Numbers) -->
+        <xpath expr="//li[@t-foreach='line.packLotLines or []']" position="replace">
+            <li t-foreach="props.line.packLotLines or []" t-as="lot" t-key="lot_index">
+                SN <t t-esc="lot" />
+            </li>
+        </xpath>
+    </t>
+</templates>

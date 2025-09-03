@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+gl_accounting_report_extend.access_master_company_user,access_master_company_user,gl_accounting_report_extend.model_master_company,base.group_user,1,0,0,0
+gl_accounting_report_extend.access_master_company_accountant,access_master_company_accountant,gl_accounting_report_extend.model_master_company,account.group_account_manager,1,1,1,1

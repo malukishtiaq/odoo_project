@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="gl_alzain_pos_extended.ControlButtons" t-inherit="point_of_sale.ControlButtons" t-inherit-mode="extension">
+        <xpath expr="//SelectPartnerButton" position="after">
+            <button t-att-class="buttonClass" t-on-click="() => this.onClickOrderEmployee()">
+                <div t-if="currentOrder?.order_employee_id" t-esc="currentOrder.order_employee_id.name" class="text-action"/>
+                <t t-else="">Employee</t>
+            </button>
+        </xpath>
+    </t>
+</templates>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="inherit_crm_lead_form_view" model="ir.ui.view">
+        <field name="name">inherit.crm.lead.form.view</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/button[@name='%(crm.action_crm_lead2opportunity_partner)d']" position="attributes">
+                <attribute name="invisible">not is_approved or type != 'opportunity'</attribute>
+            </xpath>
+            <xpath expr="//header" position="inside">
+                 <button string="Submit for Approval" name="submit_for_approval" type="object"
+                            class="oe_highlight"
+                            invisible="is_submitted_approval or state == 'approved' or type != 'opportunity' or
+                            state in ['pending_approval','pending_manager_approval', 'cancel']"/>
+                <button string="Cancel" name="cancel" type="object"
+                            invisible="type != 'opportunity' or
+                            state in ['cancel']"/>
+                <button string="Reset to Draft" name="reset_to_draft" type="object"
+                            invisible="type != 'opportunity' or
+                            state in ['draft']"/>
+                 <button string="Submit for Manager Approval" name="submit_for_manager_approval" type="object"
+                            class="oe_highlight"
+                            invisible="is_manager_approval or not is_submitted_approval or state == 'approved'
+                            or state in [ 'reject', 'cancel'] or type != 'opportunity'"
+                            groups="sales_team.group_sale_salesman_all_leads"/>
+                 <button string="Approve" name="first_approval" type="object"
+                            class="oe_highlight"
+                            invisible="not is_submitted_approval or type != 'opportunity' or state in ['pending_manager_approval','approved', 'reject','cancel']"
+                            groups="sales_team.group_sale_salesman_all_leads"/>
+                 <button string="Approve" name="second_approval" type="object"
+                            class="oe_highlight"
+                            invisible="not is_manager_approval or type != 'opportunity' or state in ['reject', 'cancel']"
+                            groups="sales_team.group_sale_manager"/>
+                <button string="Reject" name="reject" type="object"
+                        class="oe_highlight"
+                        invisible="is_approved or type != 'opportunity' or state in ['draft', 'pending_manager_approval', 'reject','cancel']"
+                        groups="sales_team.group_sale_manager,sales_team.group_sale_salesman_all_leads"/>
+                <button string="Reject" name="reject" type="object"
+                        class="oe_highlight"
+                        invisible="is_approved or type != 'opportunity' or state in ['draft', 'pending_approval', 'reject', 'cancel']"
+                        groups="sales_team.group_sale_manager"/>
+                <field name="state" widget="statusbar" statusbar_visible=" " invisible="type != 'opportunity'"/>
+            </xpath>
+           <xpath expr="//notebook" position="inside">
+               <page string="Modules Pricing" readonly="type != 'opportunity'">
+                   <group string="Customer Documents">
+                       <group>
+                             <field name="upload_trade_licence" filename="filename_1" readonly="type != 'opportunity'" required="type == 'opportunity'"/>
+                             <field name="upload_vat_certificate" filename="filename_2" readonly="type != 'opportunity'" required="type == 'opportunity'"/>
+
+                       </group>
+                       <group>
+                            <field name="upload_data_sheet" filename="filename_3" readonly="type != 'opportunity'"/>
+                            <field name="upload_company_logo" filename="filename_4" readonly="type != 'opportunity'"/>
+                       </group>
+                    </group>
+                   <field name="module_line_ids" widget="one2many" readonly="type != 'opportunity'">
+                       <list editable="bottom">
+                           <field name="lead_id" column_invisible="1"/>
+                           <field name="module_id" required="1"/>
+                           <field name="price_unit"/>
+                       </list>
+                   </field>
+               </page>
+           </xpath>
+            <xpath expr="//field[@name='team_id']" position="after">
+                <field name="modules_total_amt"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="inherit_crm_tree_view" model="ir.ui.view">
+        <field name="name">inherit.crm.tree.view</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_tree_view_leads"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='team_id']" position="after">
+                <field name="state" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

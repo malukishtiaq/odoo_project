@@ -1,0 +1,20 @@
+{
+    "name": "Extend Accounting Report",
+    "version": "18.0.1.0.0",
+    "category": "account",
+    "summary": "This module is for Accounting report extension.",
+    "author": "GreenLines",
+    "maintainers": ["GreenLines"],
+    "license": "AGPL-3",
+    "depends": ["accounting_pdf_reports", "account_financial_report"],
+    "data": [
+        "security/ir.model.access.csv",
+        "views/master_company_view.xml",
+        "views/account_move_view.xml",
+        "wizard/accounting_report_view.xml",
+        "wizard/trial_balance_report_wizard_view.xml",
+    ],
+    "installable": True,
+    "auto_install": False,
+    "application": False,
+}

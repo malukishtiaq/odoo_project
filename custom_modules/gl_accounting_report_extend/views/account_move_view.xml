@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<odoo>
+
+    <record model="ir.ui.view" id="gl_view_move_form">
+		<field name="name">gl.account.move.form</field>
+		<field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form" />
+		<field name="arch" type="xml">
+            <xpath expr="//group/group[2]" position="inside">
+                <field name="master_company_id" options="{'no_create':True,'no_create_edit':True}"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<odoo>
+
+    <record id='master_company_view_tree' model='ir.ui.view'>
+        <field name="name">master.company.list</field>
+        <field name="model">master.company</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name" />
+            </list>
+        </field>
+    </record>
+
+	<record id='master_company_action' model='ir.actions.act_window'>
+        <field name="name">Master Company</field>
+        <field name="res_model">master.company</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Master Company
+            </p>
+        </field>
+    </record>
+
+	<menuitem action="master_company_action"
+			  parent="account.account_account_menu"
+			  id="master_company_menu"
+			  sequence="12"/>
+</odoo>

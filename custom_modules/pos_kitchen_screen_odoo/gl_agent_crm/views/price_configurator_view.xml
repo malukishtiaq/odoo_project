@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="price_configurator_tree_view" model="ir.ui.view">
+        <field name="name">price.configurator.tree.view</field>
+        <field name="model">module.price.configurator</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="module_id" required="1" domain="[('application', '=', True)]"/>
+                <field name="price_unit" required="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="rejection_reason_tree_view" model="ir.ui.view">
+        <field name="name">rejection.reason.tree.view</field>
+        <field name="model">rejection.reason</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name" required="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_module_price_config" model="ir.actions.act_window">
+            <field name="name">Module Price Configuration</field>
+            <field name="res_model">module.price.configurator</field>
+            <field name="view_mode">list</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Configure Modules and their prices!!
+                </p>
+            </field>
+    </record>
+
+    <record id="action_rejection_reason_config" model="ir.actions.act_window">
+            <field name="name">Reject Reason</field>
+            <field name="res_model">rejection.reason</field>
+            <field name="view_mode">list</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Configure Rejection Reason!!
+                </p>
+            </field>
+    </record>
+
+    <menuitem
+        id="menu_module_price_config"
+        name="Module Price Configuration"
+        parent="crm.crm_menu_config"
+        action="action_module_price_config"
+        sequence="5"/>
+    <menuitem
+        id="menu_rejection_reason_config"
+        name="Rejection Reasons"
+        parent="crm.crm_menu_config"
+        action="action_rejection_reason_config"
+        sequence="6"/>
+</odoo>

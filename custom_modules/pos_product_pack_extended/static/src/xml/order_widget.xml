@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_product_pack_extended.OrderWidget" t-inherit="point_of_sale.OrderWidget" t-inherit-mode="extension">
+        <xpath expr="//t[@t-foreach='props.lines']" position="replace">
+            <t t-foreach="props.lines" t-as="line" t-key="line_index">
+                <t t-if="!line.is_component">
+                    <t t-if="props.slots?.default" t-slot="default" line="line"/>
+                    <Orderline t-else="" line="line" />
+                </t>
+            </t>
+        </xpath>
+    </t>
+</templates>

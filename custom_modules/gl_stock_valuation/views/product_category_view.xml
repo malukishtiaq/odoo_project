@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="inherit_product_category_form_view" model="ir.ui.view">
+        <field name="name">inherit.product.category.form.view</field>
+        <field name="model">product.category</field>
+        <field name="inherit_id" ref="product.product_category_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[2]" position="inside">
+                <group string="Inventory Valuation">
+                    <field name="inventory_valuation_method" required="1"/>
+                </group>
+                <group string="Account Stock" invisible="inventory_valuation_method != 'automated'">
+                    <field name="valuation_journal_id" required="inventory_valuation_method == 'automated'"/>
+                    <field name="inventory_valuation_account_id" required="inventory_valuation_method == 'automated'"/>
+                    <field name="stock_output_account_id" required="inventory_valuation_method == 'automated'"/>
+                    <field name="stock_input_account_id" required="inventory_valuation_method == 'automated'"/>
+                </group>
+                <group string="Scrap Stock" invisible="inventory_valuation_method != 'automated'">
+                    <field name="inventory_adjustment_debit_id" required="inventory_valuation_method == 'automated'"/>
+                    <field name="inventory_adjustment_credit_id" required="inventory_valuation_method == 'automated'"/>
+                </group>
+                <group string="Adjustment Stock" invisible="inventory_valuation_method != 'automated'">
+                    <field name="inventory_scrap_debit_id" required="inventory_valuation_method == 'automated'"/>
+                    <field name="inventory_scrap_credit_id" required="inventory_valuation_method == 'automated'"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

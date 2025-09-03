@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_module_price_configurator,access_module_price_configurator,model_module_price_configurator,base.group_user,1,1,1,1
+access_lead_module_selector,access_lead_module_selector,model_lead_module_selector,base.group_user,1,1,1,1
+access_rejection_reason,access_rejection_reason,model_rejection_reason,base.group_user,1,1,1,1
+access_reject_approval_wizard,access_reject_approval_wizard,model_reject_approval_wizard,base.group_user,1,1,1,1
