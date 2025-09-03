@@ -13,8 +13,9 @@ filestore/
 # Odoo core (too large)
 odoo-18/
 
-# Embedded git repositories
-custom_modules/*/
+# Embedded git repositories (exclude these specific ones)
+custom_modules/stock-logistics-reporting/
+custom_modules/stock-logistics-workflow/
 
 # System files
 .DS_Store
@@ -46,3 +47,4 @@ __pycache__/
 # Temporary files
 *.tmp
 *.temp
+**/.DS_Store
