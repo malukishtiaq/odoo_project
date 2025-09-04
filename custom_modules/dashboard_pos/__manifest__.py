@@ -21,7 +21,7 @@
 ################################################################################
 {
     'name': "POS Dashboard",
-    'version': '18.0.1.0.1',
+    'version': '18.0.1.0.2',
     'category': 'Point of Sale',
     'summary': """Detailed dashboard view for POS""",
     'description': """Customized POS dashboard view""",
@@ -39,7 +39,9 @@
             'dashboard_pos/static/src/js/pos_dashboard.js',
             'dashboard_pos/static/src/css/pos_dashboard.css',
             'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js',
-            'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js'
+            'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap',
+            'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
         ],
     },
     'external_dependencies': {

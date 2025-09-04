@@ -1,771 +1,373 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
-    <!--  Template for Pos Dashboard  -->
+    <!-- Modern POS Dashboard Template -->
     <t t-name="PosDashboard">
         <div class="oh_dashboards">
-            <div class="container-fluid o_pos_dashboard">
-                <div class="row main-section" align="center">
-                    <div class="col-md-4 col-sm-6 pos_order_today oh-payslip"
-                         t-on-click="pos_order_today">
-                        <div class="oh-card" style="width: 288px;">
-                            <div class="oh-card-body">
-                                <div class="stat-widget-one">
-                                    <div class="stat-icon"
-                                         style="background:#5bcbd0"><i class="fa fa-shopping-bag"/></div>
-                                    <div class="stat-content">
-                                        <div class="stat-head">Today Orders</div>
-                                        <div class="stat_count"><t t-esc="state.today_sale"/></div>
+            <!-- Modern KPI Cards Grid -->
+            <div class="modern-kpi-grid fade-in">
+                <!-- Today Orders -->
+                <div class="modern-kpi-card primary" t-on-click="pos_order_today">
+                    <div class="kpi-content">
+                        <div class="kpi-icon primary">
+                            <i class="fa fa-shopping-bag"/>
+                        </div>
+                        <div class="kpi-text">
+                            <div class="kpi-title">Today Orders</div>
+                            <div class="kpi-value"><t t-esc="state.today_sale"/></div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                            </div>
-                    <div class="col-md-4 col-sm-6 pos_order_today oh-payslip"
-                         t-on-click="pos_order_today">
-                        <div class="oh-card" style="width: 288px;">
-                            <div class="oh-card-body">
-                                <div class="stat-widget-one">
-                                    <div class="stat-icon"
-                                         style="background:#5bcbd0"><i class="fa fa-shopping-bag"/></div>
-                                    <div class="stat-content">
-                                        <div class="stat-head">Today Sales</div>
-                                        <div class="stat_count"><t t-esc="state.today_sale_amount"/></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 col-sm-6 pos_refund_today_orders oh-payslip"
-                         t-on-click="pos_refund_today_orders">
-                        <div class="oh-card" style="width: 288px;">
-                            <div class="oh-card-body">
-                                <div class="stat-widget-one">
-                                    <div class="stat-icon"
-                                         style="background:#5b8ed0"><i class="fa fa-minus-circle"/></div>
-                                    <div class="stat-content">
-                                        <div class="stat-head">Today Refund Order</div>
-                                        <div class="stat_count"><t t-esc="state.today_refund_total"/></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="col-md-4 col-sm-6 pos_order oh-payslip"
-                         t-on-click="pos_order">
-                        <div class="oh-card" style="width: 288px;">
-                            <div class="oh-card-body">
-                                <div class="stat-widget-one">
-                                    <div class="stat-icon"
-                                         style="background:#645bd0"><i class="fa fa-shopping-bag"/></div>
-                                    <div class="stat-content">
-                                        <div class="stat-head">Total Orders</div>
-                                        <div class="stat_count"><t t-esc="state.total_order_count"/></div>
-                                    </div>
-                                </div>
-                            </div>
+                <!-- Today Sales -->
+                <div class="modern-kpi-card success" t-on-click="pos_order_today">
+                    <div class="kpi-content">
+                        <div class="kpi-icon success">
+                            <i class="fa fa-dollar-sign"/>
+                        </div>
+                        <div class="kpi-text">
+                            <div class="kpi-title">Today Sales</div>
+                            <div class="kpi-value"><t t-esc="state.today_sale_amount"/></div>
                         </div>
                     </div>
-                    <div class="col-md-4 col-sm-6 pos_total_sales oh-payslip"
-                         t-on-click="pos_order">
-                        <div class="oh-card" style="width: 288px;">
-                            <div class="oh-card-body">
-                                <div class="stat-widget-one">
-                                    <div class="stat-icon"
-                                         style="background:#85d05b"><i class="fa fa-shopping-cart"/></div>
-                                    <div class="stat-content">
-                                        <div class="stat-head">Total Sales</div>
-                                        <div class="stat_count"><t t-esc="state.total_sale"/></div>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!--            <div class="col-md-4 col-sm-6 pos_session oh-payslip"-->
-                    <!--                 t-on-click="pos_session">-->
-                    <!--                                            <div class="oh-card"-->
-                    <!--                                                 style="width: 288px;">-->
-                    <!--                                                <div class="oh-card-body">-->
-                    <!--                                                    <div class="stat-widget-one">-->
-                    <!--                                                        <div class="stat-icon"-->
-                    <!--                                                             style="background:#d05bb8"><i class="fa fa-signal"/></div>-->
-                    <!--                                                        <div class="stat-content">-->
-                    <!--                                                            <div class="stat-head">Sessions</div>-->
-                    <!--                                                            <div class="stat_count"><t t-esc="state.total_session"/></div>-->
-                    <!--                                                        </div>-->
-                    <!--                                                    </div>-->
-                    <!--                                                </div>-->
-                    <!--                                            </div>-->
-                    <!--                                </div>-->
 
-                    <div class="col-md-4 col-sm-6 pos_refund_orders oh-payslip"
-                         t-on-click="pos_refund_orders">
-                        <div class="oh-card" style="width: 288px;">
-                            <div class="oh-card-body">
-                                <div class="stat-widget-one">
-                                    <div class="stat-icon"
-                                         style="background:#d0c35b"><i class="fa fa-minus-circle"/></div>
-                                    <div class="stat-content">
-                                        <div class="stat-head">Total Refund Orders</div>
-                                        <div class="stat_count"><t t-esc="state.total_refund_count"/></div>
-                                    </div>
+                <!-- Today Refund Orders -->
+                <div class="modern-kpi-card danger" t-on-click="pos_refund_today_orders">
+                    <div class="kpi-content">
+                        <div class="kpi-icon danger">
+                            <i class="fa fa-undo"/>
                                 </div>
-                            </div>
+                        <div class="kpi-text">
+                            <div class="kpi-title">Today Refunds</div>
+                            <div class="kpi-value"><t t-esc="state.today_refund_total"/></div>
                         </div>
                     </div>
-                    <div class="col-md-4 col-sm-6 new_customers oh-payslip"
-                         t-on-click="new_customers">
-                        <div class="oh-card" style="width: 288px;">
-                            <div class="oh-card-body">
-                                <div class="stat-widget-one">
-                                    <div class="stat-icon"
-                                         style="background:#d0c35b"><i class="fa fa-minus-circle"/></div>
-                                    <div class="stat-content">
-                                        <div class="stat-head">New Customer</div>
-                                        <div class="stat_count"><t t-esc="state.new_customer_count"/></div>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 col-sm-6 retained_customers oh-payslip"
-                         t-on-click="retained_customers">
-                        <div class="oh-card" style="width: 288px;">
-                            <div class="oh-card-body">
-                                <div class="stat-widget-one">
-                                    <div class="stat-icon"
-                                         style="background:#d0c35b"><i class="fa fa-minus-circle"/></div>
-                                    <div class="stat-content">
-                                        <div class="stat-head">Retained Customer</div>
-                                        <div class="stat_count"><t t-esc="state.retained_customer_count"/></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="col-md-4 col-sm-6 inactive_customers oh-payslip"
-                         t-on-click="inactive_customers">
-                        <div class="oh-card" style="width: 288px;">
-                            <div class="oh-card-body">
-                                <div class="stat-widget-one">
-                                    <div class="stat-icon"
-                                         style="background:#d0c35b"><i class="fa fa-minus-circle"/></div>
-                                    <div class="stat-content">
-                                        <div class="stat-head">Inactive Customer</div>
-                                        <div class="stat_count"><t t-esc="state.inactive_customer_count"/></div>
-                                    </div>
+                <!-- Total Orders -->
+                <div class="modern-kpi-card primary" t-on-click="pos_order">
+                    <div class="kpi-content">
+                        <div class="kpi-icon primary">
+                            <i class="fa fa-shopping-cart"/>
                                 </div>
-                            </div>
+                        <div class="kpi-text">
+                            <div class="kpi-title">Total Orders</div>
+                            <div class="kpi-value"><t t-esc="state.total_order_count"/></div>
+                        </div>
+                    </div>
+                                    </div>
+
+                <!-- Total Sales -->
+                <div class="modern-kpi-card success" t-on-click="pos_order">
+                    <div class="kpi-content">
+                        <div class="kpi-icon success">
+                            <i class="fa fa-chart-line"/>
+                                </div>
+                        <div class="kpi-text">
+                            <div class="kpi-title">Total Sales</div>
+                            <div class="kpi-value"><t t-esc="state.total_sale"/></div>
+                        </div>
+                    </div>
+                                    </div>
+
+                <!-- Total Refund Orders -->
+                <div class="modern-kpi-card danger" t-on-click="pos_refund_orders">
+                    <div class="kpi-content">
+                        <div class="kpi-icon danger">
+                            <i class="fa fa-times-circle"/>
+                                </div>
+                        <div class="kpi-text">
+                            <div class="kpi-title">Total Refunds</div>
+                            <div class="kpi-value"><t t-esc="state.total_refund_count"/></div>
+                        </div>
+                    </div>
+                                    </div>
+
+                <!-- New Customers -->
+                <div class="modern-kpi-card info" t-on-click="new_customers">
+                    <div class="kpi-content">
+                        <div class="kpi-icon info">
+                            <i class="fa fa-user-plus"/>
+                                </div>
+                        <div class="kpi-text">
+                            <div class="kpi-title">New Customers</div>
+                            <div class="kpi-value"><t t-esc="state.new_customer_count"/></div>
+                        </div>
+                    </div>
+                                    </div>
+
+                <!-- Retained Customers -->
+                <div class="modern-kpi-card warning" t-on-click="retained_customers">
+                    <div class="kpi-content">
+                        <div class="kpi-icon warning">
+                            <i class="fa fa-user-check"/>
+                                </div>
+                        <div class="kpi-text">
+                            <div class="kpi-title">Retained Customers</div>
+                            <div class="kpi-value"><t t-esc="state.retained_customer_count"/></div>
+                        </div>
+                    </div>
+                                    </div>
+
+                <!-- Inactive Customers -->
+                <div class="modern-kpi-card danger" t-on-click="inactive_customers">
+                    <div class="kpi-content">
+                        <div class="kpi-icon danger">
+                            <i class="fa fa-user-times"/>
+                                </div>
+                        <div class="kpi-text">
+                            <div class="kpi-title">Inactive Customers</div>
+                            <div class="kpi-value"><t t-esc="state.inactive_customer_count"/></div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-xs-12 col-sm-12 col-lg-12 col-md-12">
-            <div class="row" style="margin:0px;">
-                <div class="col-md-6" id="col-graph">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">
-                                <b>
-                                    <h3 class="custom-h3">SALE REPORT</h3>
-                                </b>
-                            </div>
-                            <div class="card-tools">
-                            <select id="pos_sales"
-                                    t-on-click="onclick_pos_sales">
-                                <option style="display:none;"> -- select an option -- </option>
-                                <!--                                <option value="pos_hourly_sales">Hourly</option>-->
+
+            <!-- Modern Charts Section -->
+            <div class="charts-section slide-in-left">
+                <!-- Sales Report Chart -->
+                <div class="modern-chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Sales Report</h3>
+                        <div class="chart-controls">
+                            <select class="modern-select" id="pos_sales" t-on-click="onclick_pos_sales">
+                                <option value="">Select Period</option>
                                 <option value="pos_weekly_sales">Weekly</option>
                                 <option value="pos_monthly_sales">Monthly</option>
-                                <!--                                <option value="pos_year_sales">Yearly</option>-->
                             </select>
                         </div>
                         </div>
-                        <h4>SALE DETAILS</h4>
-                        <div class="card-body mt-3" id="in_ex_body_hide">
-                             <div class="row">
-                                <div class="col-md-12">
-                                   <p id="myelement1"> </p>
-                                    <div class="chart">
-                                      <canvas id="canvas_1" width="200"
-                                              height="90"> </canvas>
-                                   </div>
-                                </div>
-                             </div>
-                        </div>
+                    <div class="chart-container">
+                        <canvas id="canvas_1" width="400" height="200"></canvas>
                     </div>
                 </div>
 
-                <div class="col-md-6" id="col-graph">
-                    <div class="card" style="height: 100%;">
-                        <div class="card-header">
-                            <div class="card-title">
-                                <b><h3 class="custom-h3">SALE V/S COST</h3></b>
-                            </div>
-                            <div class="card-tools">
-                                <select id="pos_sales_cost" t-on-click="onclick_pos_sales_cost">
-                                    <option style="display:none;">select an option for sale vs cost</option>
+                <!-- Sales vs Cost Card -->
+                <div class="modern-chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Sales vs Cost</h3>
+                        <div class="chart-controls">
+                            <select class="modern-select" id="pos_sales_cost" t-on-click="onclick_pos_sales_cost">
+                                <option value="">Select Period</option>
                                     <option value="pos_today_sales_cost">Today</option>
                                     <option value="pos_week_sales_cost">Week</option>
                                     <option value="pos_month_sales_cost">Month</option>
                                 </select>
                             </div>
                         </div>
-
-                        <div class="card-body">
-                            <div class="hr_notification"
-                                 style="background: #fff;
-                                        transition: transform 0.2s ease, box-shadow 0.2s ease;
-                                        will-change: transform, box-shadow;
-                                        box-shadow: 0 10px 40px 0 rgba(62,57,107,0.07), 0 2px 9px 0 rgba(62,57,107,0.06);
-                                        height: 100%;
-                                        width: 100%;
-                                        overflow-y: auto;
-                                        margin-bottom: 15px;">
-                                <div class="hr_notification_head"
-                                     style="font-size: 17px; text-align: center; padding: 12px 0; color: #fff;
-                                            font-weight: 300; background: #de6a5e; margin-bottom: 9px;">
-                                    Sales Vs Cost
+                    <div class="sales-cost-grid">
+                        <div class="sales-cost-item sales">
+                            <div class="sales-cost-label">Sales</div>
+                            <div class="sales-cost-value"><t t-esc="state.sale_vs_cost[0]"/></div>
                                 </div>
-                                <table class="table table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th>Sale</th>
-                                            <th>Cost</th>
-                                            <th>Profit</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td><h2 style="font-size: 15px;"><t t-esc="state.sale_vs_cost[0]"/></h2></td>
-                                            <td><h2 style="font-size: 15px;"><t t-esc="state.sale_vs_cost[1]"/></h2></td>
-                                            <td><h2 style="font-size: 15px;"><t t-esc="state.sale_vs_cost[2]"/></h2></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div class="sales-cost-item cost">
+                            <div class="sales-cost-label">Cost</div>
+                            <div class="sales-cost-value"><t t-esc="state.sale_vs_cost[1]"/></div>
                         </div>
-                    </div>
-                </div>
-
-
-                <!--                <div class="col-sm-4 col-lg-4  top_customer_graph_view">-->
-                <!--                    <div class="oh-card text-color">-->
-                <!--                        <div class="oh-card-body pb-0">-->
-                <!--                            <h4 class="mb-0">-->
-                <!--                            </h4>-->
-                <!--                        </div>-->
-                <!--                        <canvas class="top_customer" width="100" height="80"/>-->
-                <!--                    </div>-->
-                <!--                </div>-->
-                <!--                <div class="col-sm-6 col-lg-6  selling_product_graph_view">-->
-                <!--                    <div class="oh-card text-color">-->
-                <!--                        <div class="oh-card-body pb-0">-->
-                <!--                            <h4 class="mb-0">-->
-                <!--                            </h4>-->
-                <!--                        </div>-->
-                <!--                        <canvas class="top_selling_product" width="200"-->
-                <!--                                height="120"/>-->
-                <!--                    </div>-->
-                <!--                </div>-->
-                <!--                <div class="col-sm-6 col-lg-6  selling_product_graph_view">-->
-                <!--                    <div class="oh-card text-color">-->
-                <!--                        <div class="oh-card-body pb-0">-->
-                <!--                            <h4 class="mb-0">-->
-                <!--                            </h4>-->
-                <!--                        </div>-->
-                <!--                        <canvas class="top_product_categories" width="200"-->
-                <!--                                height="120"/>-->
-                <!--                    </div>-->
-                <!--                </div>-->
-            </div>
-        </div>
-
-        <div class="row main-section" style="padding-left: 50px;">
-        <!-- Column 1: Sale by Salesperson -->
-            <div class="col-md-6 col-lg-6">
-                <div class="hr_notification"
-                     style="background: #fff; transition: transform 0.2s ease, box-shadow 0.2s ease;
-                            will-change: transform, box-shadow;
-                            box-shadow: 0 10px 40px 0 rgba(62,57,107,0.07),
-                                        0 2px 9px 0 rgba(62,57,107,0.06);
-                            height: 316px; overflow-y: auto; margin-bottom: 15px;">
-                    <div class="hr_notification_head"
-                         style="font-size: 17px; text-align: center; padding: 12px 0; color: #fff;
-                                font-weight: 300; background: #de6a5e; margin-bottom: 9px;">
-                        Sale by Salesperson
-                    </div>
-                    <div class="col-sm-12 col-lg-12" style="padding:0;">
-                        <div class="text-color">
-                            <div class="media">
-                                <div class="media-body">
-                                    <table class="table table-sm">
-                                        <thead>
-                                            <tr>
-                                                <th>Name</th>
-                                                <th>Orders</th>
-                                                <th>Amount</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                             <t t-foreach="state.top_salesperson"
-                                                t-as="salesperson"
-                                                t-key="salesperson.id_index">
-                                                <tr>
-                                                    <td>
-                                                        <h2 class="text-color display-6" style="font-size: 15px;">
-                                                            <t t-esc="salesperson[0]"/>
-                                                        </h2>
-                                                    </td>
-                                                    <td>
-                                                        <h2 class="text-color display-6" style="font-size: 15px;">
-                                                            <t t-esc="salesperson[2]"/>
-                                                        </h2>
-                                                    </td>
-                                                    <td>
-                                                        <h2 class="text-color display-6" style="font-size: 15px;">
-                                                            <t t-esc="salesperson[1]"/>
-                                                        </h2>
-                                                    </td>
-                                                </tr>
-                                            </t>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                        <div class="sales-cost-item profit">
+                            <div class="sales-cost-label">Profit</div>
+                            <div class="sales-cost-value"><t t-esc="state.sale_vs_cost[2]"/></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Column 2: Session Status -->
-            <div class="col-md-6 col-lg-6">
-                <div class="hr_notification"
-                     style="background: #fff; transition: transform 0.2s ease, box-shadow 0.2s ease;
-                            will-change: transform, box-shadow;
-                            box-shadow: 0 10px 40px 0 rgba(62,57,107,0.07),
-                                        0 2px 9px 0 rgba(62,57,107,0.06);
-                            height: 316px; overflow-y: auto; margin-bottom: 15px;">
-                    <div class="hr_notification_head"
-                         style="font-size: 17px; text-align: center; padding: 12px 0; color: #fff;
-                                font-weight: 300; background: #de6a5e; margin-bottom: 9px;">
-                        Session Status
+            <!-- Date Range Selector -->
+            <div class="date-range-section slide-in-right">
+                <div class="date-range-header">
+                    <h3 class="date-range-title">Date Range Filter</h3>
+                </div>
+                <div class="date-inputs">
+                    <div class="date-input-group">
+                        <label class="date-label">From Date</label>
+                        <input type="date" class="modern-date-input" id="from_date_cus" 
+                               t-att-value="state.from_date" t-on-change="onDateChange"/>
                     </div>
-                    <div class="col-sm-12 col-lg-12" style="padding:0;">
-                        <div class="text-color">
-                            <div class="media">
-                                <div class="media-body">
-                                    <table class="table table-sm">
-                                        <thead>
-                                            <tr>
-                                                <th>Session</th>
-                                                <th>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                             <t t-foreach="state.selling_product"
-                                                t-as="session"
-                                                t-key="session.id_index">
-                                                <tr>
-                                                    <td>
-                                                        <h2 class="text-color display-6" style="font-size: 15px;">
-                                                            <t t-esc="session['session']"/>
-                                                        </h2>
-                                                    </td>
-                                                    <td>
-                                                        <h2 class="text-color display-6" style="font-size: 15px;">
-                                                            <t t-esc="session['status']"/>
-                                                        </h2>
-                                                    </td>
-                                                </tr>
-                                            </t>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="date-input-group">
+                        <label class="date-label">To Date</label>
+                        <input type="date" class="modern-date-input" id="to_date_cus" 
+                               t-att-value="state.to_date" t-on-change="onDateChange"/>
                     </div>
                 </div>
             </div>
+
+            <!-- Target Input Section -->
+            <div class="target-section slide-in-left">
+                <h3 class="target-header">Monthly Target Setting</h3>
+                <div class="target-form">
+                    <div class="target-input-group">
+                        <label class="target-label">Monthly Target Amount</label>
+                        <input type="number" class="modern-input" id="float_input" 
+                               step="any" placeholder="Enter Monthly Target"/>
         </div>
-        <div class="col-xs-12 col-sm-12 col-lg-12 col-md-12">
-            <div class="card-header" style="padding-left: 4.25rem;">
-                <div class="card-title">
-                    <b>
-                        <h3 class="custom-h3">Select Dates</h3>
-                    </b>
-                </div>
-                <div class="card-tools">
-                     <h4>From Date:
-                        <input type="date" id="from_date_cus" t-att-value="state.from_date"
-                               t-on-change="onDateChange"/>
-                    </h4>
-                    <h4>To Date:
-                        <input type="date" id="to_date_cus" t-att-value="state.to_date" t-on-change="onDateChange"/>
-                    </h4>
+                    <button class="modern-btn" id="submit_target" t-on-click="onSubmitTarget">
+                        Set Target
+                    </button>
                 </div>
             </div>
-        </div>
-        <div class="row main-section" style="padding-left: 50px;">
-            <div class="col-md-6 col-lg-6">
-                <div class="hr_notification"
-                     style="background: #fff;transition: transform 0.2s ease, box-shadow 0.2s ease;...">
-                    <div class="hr_notification_head">Top Selling Product POS</div>
-                    <div class="col-sm-12 col-lg-12" style="padding:0;">
-                        <div class="text-color">
-                            <div class="media">
-                                <div class="media-body">
-                                    <table class="table table-sm">
+
+            <!-- Modern Tables Section -->
+            <div class="tables-section slide-in-right">
+                <!-- Top Selling Products POS -->
+                <div class="modern-table-card">
+                    <div class="table-header">Top Selling Products (POS)</div>
+                    <table class="modern-table">
                                         <thead>
                                         <tr>
-                                            <th>Name</th>
-                                            <th>Sold Quantity</th>
-                                            <th>Remaining Quantity</th>
+                                <th>Product Name</th>
+                                <th>Sold Qty</th>
+                                <th>Remaining</th>
                                             <th>Total Amount</th>
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        <t t-foreach="state.top_selling_product_pos" t-as="product"
-                                           t-key="product.id_index">
-                                            <tr>
-                                                <td><h2 class="text-color display-6" style="font-size: 15px;">
-                                                    <t t-esc="product.product_name['en_US']"/>
-                                                </h2></td>
-                                                <td><h2 class="text-color display-6" style="font-size: 15px;">
-                                                    <t t-esc="product.total_quantity"/>
-                                                </h2></td>
-                                                <td><h2 class="text-color display-6" style="font-size: 15px;">
-                                                    <t t-esc="product.available_quantity"/>
-                                                </h2></td>
-                                                <td><h2 class="text-color display-6" style="font-size: 15px;">
-                                                    <t t-esc="(product.total_quantity * product.cost).toFixed(2)"/>
-                                                </h2></td>
+                            <t t-foreach="state.top_selling_product_pos" t-as="product" t-key="product.id_index">
+                                <tr>
+                                    <td><t t-esc="product.product_name['en_US']"/></td>
+                                    <td><t t-esc="product.total_quantity"/></td>
+                                    <td><t t-esc="product.available_quantity"/></td>
+                                    <td><t t-esc="(product.total_quantity * product.cost).toFixed(2)"/></td>
                                             </tr>
                                         </t>
                                         </tbody>
                                     </table>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-6">
-                <div class="hr_notification" style="background: #fff;transition: ...">
-                    <div class="hr_notification_head">Top Selling Product Inventory</div>
-                    <div class="col-sm-12 col-lg-12" style="padding:0;">
-                        <div class="text-color">
-                            <div class="media">
-                                <div class="media-body">
-                                    <table class="table table-sm">
+
+                <!-- Top Selling Products Inventory -->
+                <div class="modern-table-card">
+                    <div class="table-header">Top Selling Products (Inventory)</div>
+                    <table class="modern-table">
                                         <thead>
                                         <tr>
-                                            <th>Name</th>
-                                            <th>Sold Quantity</th>
-                                            <th>Remaining Quantity</th>
+                                <th>Product Name</th>
+                                <th>Sold Qty</th>
+                                <th>Remaining</th>
                                             <th>Total Amount</th>
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        <t t-foreach="state.top_selling_product_inv" t-as="product"
-                                           t-key="product.id_index">
-                                            <tr>
-                                                <td><h2 class="text-color display-6" style="font-size: 15px;">
-                                                    <t t-esc="product.product_name['en_US']"/>
-                                                </h2></td>
-                                                <td><h2 class="text-color display-6" style="font-size: 15px;">
-                                                    <t t-esc="product.total_quantity"/>
-                                                </h2></td>
-                                                <td><h2 class="text-color display-6" style="font-size: 15px;">
-                                                    <t t-esc="product.available_quantity"/>
-                                                </h2></td>
-                                                <td><h2 class="text-color display-6" style="font-size: 15px;">
-                                                    <t t-esc="(product.total_quantity * product.cost).toFixed(2)"/>
-                                                </h2></td>
+                            <t t-foreach="state.top_selling_product_inv" t-as="product" t-key="product.id_index">
+                                <tr>
+                                    <td><t t-esc="product.product_name['en_US']"/></td>
+                                    <td><t t-esc="product.total_quantity"/></td>
+                                    <td><t t-esc="product.available_quantity"/></td>
+                                    <td><t t-esc="(product.total_quantity * product.cost).toFixed(2)"/></td>
                                             </tr>
                                         </t>
                                         </tbody>
                                     </table>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row main-section" style="padding-left: 50px;">
-            <div class="col-md-6 col-lg-6">
-                <div class="hr_notification" style="background: #fff;transition: ...">
-                    <div class="hr_notification_head">Lowest Selling Product POS</div>
-                    <div class="col-sm-12 col-lg-12" style="padding:0;">
-                        <div class="text-color">
-                            <div class="media">
-                                <div class="media-body">
-                                    <table class="table table-sm">
+
+                <!-- Sales by Salesperson -->
+                <div class="modern-table-card">
+                    <div class="table-header">Sales by Salesperson</div>
+                    <table class="modern-table">
                                         <thead>
                                         <tr>
-                                            <th>Name</th>
-                                            <th>Sold Quantity</th>
-                                            <th>Remaining Quantity</th>
-                                            <th>Total Amount</th>
+                                <th>Salesperson</th>
+                                <th>Orders</th>
+                                <th>Amount</th>
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        <t t-foreach="state.low_selling_product_pos" t-as="product"
-                                           t-key="product.id_index">
-                                            <tr>
-                                                <td><h2 class="text-color display-6" style="font-size: 15px;">
-                                                    <t t-esc="product.product_name['en_US']"/>
-                                                </h2></td>
-                                                <td><h2 class="text-color display-6" style="font-size: 15px;">
-                                                    <t t-esc="product.total_quantity"/>
-                                                </h2></td>
-                                                <td><h2 class="text-color display-6" style="font-size: 15px;">
-                                                    <t t-esc="product.available_quantity"/>
-                                                </h2></td>
-                                                <td><h2 class="text-color display-6" style="font-size: 15px;">
-                                                    <t t-esc="(product.total_quantity * product.cost).toFixed(2)"/>
-                                                </h2></td>
+                            <t t-foreach="state.top_salesperson" t-as="salesperson" t-key="salesperson.id_index">
+                                <tr>
+                                    <td><t t-esc="salesperson[0]"/></td>
+                                    <td><t t-esc="salesperson[2]"/></td>
+                                    <td><t t-esc="salesperson[1]"/></td>
                                             </tr>
                                         </t>
                                         </tbody>
                                     </table>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-6">
-                <div class="hr_notification" style="background: #fff;transition: ...">
-                    <div class="hr_notification_head">Lowest Selling Product Inventory</div>
-                    <div class="col-sm-12 col-lg-12" style="padding:0;">
-                        <div class="text-color">
-                            <div class="media">
-                                <div class="media-body">
-                                    <table class="table table-sm">
+
+                <!-- Session Status -->
+                <div class="modern-table-card">
+                    <div class="table-header">Session Status</div>
+                    <table class="modern-table">
                                         <thead>
                                         <tr>
-                                            <th>Name</th>
-                                            <th>Sold Quantity</th>
-                                            <th>Remaining Quantity</th>
-                                            <th>Total Amount</th>
+                                <th>Session</th>
+                                <th>Status</th>
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        <t t-foreach="state.low_selling_product_inv" t-as="product"
-                                           t-key="product.id_index">
-                                            <tr>
-                                                <td><h2 class="text-color display-6" style="font-size: 15px;">
-                                                    <t t-esc="product.product_name['en_US']"/>
-                                                </h2></td>
-                                                <td><h2 class="text-color display-6" style="font-size: 15px;">
-                                                    <t t-esc="product.total_quantity"/>
-                                                </h2></td>
-                                                <td><h2 class="text-color display-6" style="font-size: 15px;">
-                                                    <t t-esc="product.available_quantity"/>
-                                                </h2></td>
-                                                <td><h2 class="text-color display-6" style="font-size: 15px;">
-                                                    <t t-esc="(product.total_quantity * product.cost).toFixed(2)"/>
-                                                </h2></td>
+                            <t t-foreach="state.selling_product" t-as="session" t-key="session.id_index">
+                                <tr>
+                                    <td><t t-esc="session['session']"/></td>
+                                    <td><t t-esc="session['status']"/></td>
                                             </tr>
                                         </t>
                                         </tbody>
                                     </table>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row main-section" style="padding-left: 50px;">
-            <div class="col-md-4 col-lg-4">
-                <div class="hr_notification" style="background: #fff;transition: transform 0.2s ease, box-shadow 0.2s ease;will-change: transform, box-shadow;box-shadow: 0 10px 40px 0 rgba(62,57,107,0.07), 0 2px 9px 0 rgba(62,57,107,0.06);
-                    height: 316px;overflow-y: auto;margin-bottom: 15px;">
-                    <div class="hr_notification_head"
-                         style="font-size: 17px;text-align: center;padding: 12px 0;color: #fff;font-weight: 300;background:#de6a5e;;margin-bottom: 9px;">
-                        Payment Method
-                    </div>
-                    <div class="col-sm-12 col-lg-12" style="padding:0;">
-                        <div class="text-color">
-                            <div class="">
-                                <div class="media">
-                                    <div class="media-body">
-                                        <table class="table table-sm">
+
+                <!-- Payment Methods -->
+                <div class="modern-table-card">
+                    <div class="table-header">Payment Methods</div>
+                    <table class="modern-table">
                                             <thead>
                                                 <tr>
-                                                    <th rowspan="12">Payment Method&#160;&#160;&#160;</th>
-                                                    <th rowspan="12">Amount</th>
+                                <th>Payment Method</th>
+                                <th>Amount</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                 <t t-foreach="state.payment_details"
-                                                    t-as="payment_method"
-                                                    t-key="payment_method.id_index">
-                                                    <tr>
-                                                        <td>
-                                                            <h2 class="text-color display-6"
-                                                                style="font-size: 15px;">
-                                                                    <t t-esc="payment_method[0]['en_US']"/>
-                                                            </h2>
-                                                        </td>
-                                                        <td>
-                                                            <h2 class="text-color display-6"
-                                                                style="font-size: 15px;">
-                                                                <t t-esc="payment_method[1]"/>
-                                                            </h2>
-                                                        </td>
+                            <t t-foreach="state.payment_details" t-as="payment_method" t-key="payment_method.id_index">
+                                <tr>
+                                    <td><t t-esc="payment_method[0]['en_US']"/></td>
+                                    <td><t t-esc="payment_method[1]"/></td>
                                                     </tr>
                                                 </t>
                                             </tbody>
                                         </table>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4 col-lg-4" style="padding-left: 4.25rem;">
-             <div class="card-tools">
-                <label for="float_input">Add Monthly Target</label>
-                 <input type="number" id="float_input" step="any" placeholder="Enter Monthly Target"/>
-                 <button id="submit_target" class="btn btn-primary" t-on-click="onSubmitTarget">Submit</button>
-            </div>
-        </div>
-        <div class="col-md-4 col-lg-4" style="padding-left: 4.25rem;">
-             <div class="hr_notification" style="background: #fff;transition: transform 0.2s ease, box-shadow 0.2s ease;will-change: transform, box-shadow;box-shadow: 0 10px 40px 0 rgba(62,57,107,0.07), 0 2px 9px 0 rgba(62,57,107,0.06);
-                height: 316px;overflow-y: auto;margin-bottom: 15px;">
-                 <div class="hr_notification_head"
-                      style="font-size: 17px;text-align: center;padding: 12px 0;color: #fff;font-weight: 300;background: #de6a5e;margin-bottom: 9px;">
-                    Monthly Target
-                 </div>
-                 <div class="col-sm-12 col-lg-12" style="padding:0;">
-                    <div class="text-color">
-                        <div class="">
-                            <div class="media">
-                                <div class="media-body">
-                                    <table class="table table-sm">
+
+                <!-- Monthly Target Progress -->
+                <div class="modern-table-card">
+                    <div class="table-header">Target Progress</div>
+                    <table class="modern-table">
                                         <thead>
                                             <tr>
-                                                <th rowspan="12">/</th>
-                                                <th rowspan="12">Actual</th>
-                                                <th rowspan="12">Target</th>
-                                                <th rowspan="12">Percentage</th>
+                                <th>Period</th>
+                                <th>Actual</th>
+                                <th>Target</th>
+                                <th>Progress</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td>
-                                                    <h2 class="text-color display-6" style="font-size: 15px;">
-                                                        Daily
-                                                    </h2>
-                                                </td>
-                                                <td>
-                                                    <h2 class="text-color display-6" style="font-size: 15px;">
-                                                        <t t-esc="state.daily_actual"/>
-                                                    </h2>
-                                                </td>
-                                                <td>
-                                                    <h2 class="text-color display-6" style="font-size: 15px;">
-                                                        <t t-esc="state.daily_target"/>
-                                                    </h2>
-                                                </td>
-                                                <td>
-                                                    <h2 class="text-color display-6" style="font-size: 15px;">
-                                                        <t t-esc="state.daily_percentage"/>%
-                                                    </h2>
-                                                </td>
+                                <td>Daily</td>
+                                <td><t t-esc="state.daily_actual"/></td>
+                                <td><t t-esc="state.daily_target"/></td>
+                                <td><t t-esc="state.daily_percentage"/>%</td>
                                             </tr>
                                             <tr>
-                                                <td>
-                                                    <h2 class="text-color display-6" style="font-size: 15px;">
-                                                        Weekly
-                                                    </h2>
-                                                </td>
-                                                <td>
-                                                    <h2 class="text-color display-6" style="font-size: 15px;">
-                                                        <t t-esc="state.weekly_actual"/>
-                                                    </h2>
-                                                </td>
-                                                <td>
-                                                    <h2 class="text-color display-6" style="font-size: 15px;">
-                                                        <t t-esc="state.weekly_target"/>
-                                                    </h2>
-                                                </td>
-                                                <td>
-                                                    <h2 class="text-color display-6" style="font-size: 15px;">
-                                                        <t t-esc="state.weekly_percentage"/>%
-                                                    </h2>
-                                                </td>
+                                <td>Weekly</td>
+                                <td><t t-esc="state.weekly_actual"/></td>
+                                <td><t t-esc="state.weekly_target"/></td>
+                                <td><t t-esc="state.weekly_percentage"/>%</td>
                                             </tr>
                                             <tr>
-                                                <td>
-                                                    <h2 class="text-color display-6" style="font-size: 15px;">
-                                                        Monthly
-                                                    </h2>
-                                                </td>
-                                                <td>
-                                                    <h2 class="text-color display-6" style="font-size: 15px;">
-                                                        <t t-esc="state.monthly_actual"/>
-                                                    </h2>
-                                                </td>
-                                                <td>
-                                                    <h2 class="text-color display-6" style="font-size: 15px;">
-                                                        <t t-esc="state.monthly_target"/>
-                                                    </h2>
-                                                </td>
-                                                <td>
-                                                    <h2 class="text-color display-6" style="font-size: 15px;">
-                                                        <t t-esc="state.monthly_percentage"/>%
-                                                    </h2>
-                                                </td>
+                                <td>Monthly</td>
+                                <td><t t-esc="state.monthly_actual"/></td>
+                                <td><t t-esc="state.monthly_target"/></td>
+                                <td><t t-esc="state.monthly_percentage"/>%</td>
                                             </tr>
                                         </tbody>
                                     </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-12 col-lg-6" style="padding-left: 15px;"> <!-- Increased width and added left space -->
-            <div class="hr_notification"
-                 style="background: #fff;
-                transition: transform 0.2s ease, box-shadow 0.2s ease;
-                will-change: transform, box-shadow;
-                box-shadow: 0 10px 40px 0 rgba(62,57,107,0.07), 0 2px 9px 0 rgba(62,57,107,0.06);
-                height: 650px;  /* Increased height */
-                overflow-y: auto;
-                margin-bottom: 15px;
-                padding: 10px;"> <!-- Added inner padding for spacing -->
 
-                <div class="hr_notification_head"
-                     style="font-size: 18px;
-                    text-align: center;
-                    padding: 14px 0;
-                    color: #fff;
-                    font-weight: 400;
-                    background:#de6a5e;
-                    margin-bottom: 12px;">
-                        Monthly History
-                </div>
-
-                <div class="col-sm-12 col-lg-12" style="padding:0;">
-                    <div class="text-color">
-                        <div class="">
-                            <div class="media">
-                                <div class="media-body">
-                                    <table class="table table-sm">
+            <!-- Monthly History Table -->
+            <div class="modern-table-card slide-in-left" style="margin-top: 24px;">
+                <div class="table-header">Monthly History</div>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table class="modern-table">
                                         <thead>
                                             <tr>
                                                 <th>Month</th>
-                                                <th>Sale</th>
+                                <th>Sales</th>
                                                 <th>Cost</th>
                                                 <th>Commission</th>
                                                 <th>Gross Profit</th>
@@ -790,10 +392,5 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-             </div>
-        </div>
-
     </t>
 </templates>
