@@ -172,6 +172,188 @@
                 </div>
             </div>
 
+            <!-- Accounting Reports Section -->
+            <div class="accounting-reports-section slide-in-left">
+                <div class="reports-header">
+                    <h3 class="reports-title">Financial Reports</h3>
+                    <div class="reports-controls">
+                        <div class="report-date-selector">
+                            <label class="date-label">Report Period</label>
+                            <div class="date-inputs-inline">
+                                <input type="date" class="modern-date-input" id="report_from_date" 
+                                       t-att-value="state.report_from_date" t-on-change="onReportDateChange"/>
+                                <span class="date-separator">to</span>
+                                <input type="date" class="modern-date-input" id="report_to_date" 
+                                       t-att-value="state.report_to_date" t-on-change="onReportDateChange"/>
+                            </div>
+                        </div>
+                        <div class="report-type-selector">
+                            <label class="date-label">Report Type</label>
+                            <select class="modern-select" id="report_type" t-on-change="onReportTypeChange">
+                                <option value="profit_loss">Profit & Loss</option>
+                                <option value="balance_sheet">Balance Sheet</option>
+                                <option value="trial_balance">Trial Balance</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Report Display Area -->
+                <div class="report-display-area">
+                    <!-- Profit & Loss Report -->
+                    <div class="report-content" t-if="state.current_report_type === 'profit_loss'">
+                        <div class="report-header">
+                            <h4 class="report-title">Profit & Loss Statement</h4>
+                            <div class="report-period">
+                                <t t-esc="state.report_from_date"/> to <t t-esc="state.report_to_date"/>
+                            </div>
+                        </div>
+                        <div class="report-table-container">
+                            <table class="modern-report-table">
+                                <thead>
+                                    <tr>
+                                        <th>Account</th>
+                                        <th>Debit</th>
+                                        <th>Credit</th>
+                                        <th>Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="state.profit_loss_data" t-as="line" t-key="line.id">
+                                        <tr t-att-class="line.level === 1 ? 'report-total-row' : (line.level === 2 ? 'report-subtotal-row' : '')">
+                                            <td t-att-style="'padding-left: ' + (line.level * 20) + 'px'">
+                                                <t t-esc="line.name"/>
+                                            </td>
+                                            <td class="text-right">
+                                                <t t-esc="line.debit"/>
+                                            </td>
+                                            <td class="text-right">
+                                                <t t-esc="line.credit"/>
+                                            </td>
+                                            <td class="text-right" t-att-class="line.balance < 0 ? 'text-danger' : 'text-success'">
+                                                <t t-esc="line.balance"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Balance Sheet Report -->
+                    <div class="report-content" t-if="state.current_report_type === 'balance_sheet'">
+                        <div class="report-header">
+                            <h4 class="report-title">Balance Sheet</h4>
+                            <div class="report-period">
+                                As of <t t-esc="state.report_to_date"/>
+                            </div>
+                        </div>
+                        <div class="balance-sheet-container">
+                            <div class="balance-sheet-section">
+                                <h5 class="section-title">ASSETS</h5>
+                                <table class="modern-report-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Account</th>
+                                            <th>Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="state.balance_sheet_assets" t-as="line" t-key="line.id">
+                                            <tr t-att-class="line.level === 1 ? 'report-total-row' : (line.level === 2 ? 'report-subtotal-row' : '')">
+                                                <td t-att-style="'padding-left: ' + (line.level * 20) + 'px'">
+                                                    <t t-esc="line.name"/>
+                                                </td>
+                                                <td class="text-right">
+                                                    <t t-esc="line.balance"/>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="balance-sheet-section">
+                                <h5 class="section-title">LIABILITIES & EQUITY</h5>
+                                <table class="modern-report-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Account</th>
+                                            <th>Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="state.balance_sheet_liabilities" t-as="line" t-key="line.id">
+                                            <tr t-att-class="line.level === 1 ? 'report-total-row' : (line.level === 2 ? 'report-subtotal-row' : '')">
+                                                <td t-att-style="'padding-left: ' + (line.level * 20) + 'px'">
+                                                    <t t-esc="line.name"/>
+                                                </td>
+                                                <td class="text-right">
+                                                    <t t-esc="line.balance"/>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trial Balance Report -->
+                    <div class="report-content" t-if="state.current_report_type === 'trial_balance'">
+                        <div class="report-header">
+                            <h4 class="report-title">Trial Balance</h4>
+                            <div class="report-period">
+                                <t t-esc="state.report_from_date"/> to <t t-esc="state.report_to_date"/>
+                            </div>
+                        </div>
+                        <div class="report-table-container">
+                            <table class="modern-report-table">
+                                <thead>
+                                    <tr>
+                                        <th>Account</th>
+                                        <th>Debit</th>
+                                        <th>Credit</th>
+                                        <th>Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="state.trial_balance_data" t-as="line" t-key="line.id">
+                                        <tr t-att-class="line.level === 1 ? 'report-total-row' : (line.level === 2 ? 'report-subtotal-row' : '')">
+                                            <td t-att-style="'padding-left: ' + (line.level * 20) + 'px'">
+                                                <t t-esc="line.name"/>
+                                            </td>
+                                            <td class="text-right">
+                                                <t t-esc="line.debit"/>
+                                            </td>
+                                            <td class="text-right">
+                                                <t t-esc="line.credit"/>
+                                            </td>
+                                            <td class="text-right" t-att-class="line.balance < 0 ? 'text-danger' : 'text-success'">
+                                                <t t-esc="line.balance"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div class="report-loading" t-if="state.report_loading">
+                        <div class="loading-spinner"></div>
+                        <p>Generating report...</p>
+                    </div>
+
+                    <!-- No Data State -->
+                    <div class="report-no-data" t-if="!state.report_loading and state.current_report_data.length === 0">
+                        <div class="no-data-icon">
+                            <i class="fa fa-chart-line"/>
+                        </div>
+                        <p>No data available for the selected period</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Date Range Selector -->
             <div class="date-range-section slide-in-right">
                 <div class="date-range-header">

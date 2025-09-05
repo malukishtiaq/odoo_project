@@ -45,6 +45,16 @@ export class PosDashboard extends Component {
       monthly_target: [],
       monthly_percentage: [],
       history_data: [],
+      // Accounting Reports State
+      report_from_date: this.get_today(),
+      report_to_date: this.get_today(),
+      current_report_type: 'profit_loss',
+      report_loading: false,
+      profit_loss_data: [],
+      balance_sheet_assets: [],
+      balance_sheet_liabilities: [],
+      trial_balance_data: [],
+      current_report_data: [],
     });
     // When the component is about to start, fetch data in tiles
     onWillStart(async () => {
@@ -749,6 +759,237 @@ export class PosDashboard extends Component {
     kpiValues.forEach(value => {
       value.title = `Current Value: ${value.textContent}`;
     });
+  }
+
+  // ===== ACCOUNTING REPORTS METHODS =====
+
+  // Handle report date change
+  async onReportDateChange() {
+    const fromDate = document.getElementById('report_from_date').value;
+    const toDate = document.getElementById('report_to_date').value;
+    
+    if (fromDate && toDate) {
+      this.state.report_from_date = fromDate;
+      this.state.report_to_date = toDate;
+      await this.generateAccountingReport();
+    }
+  }
+
+  // Handle report type change
+  async onReportTypeChange() {
+    const reportType = document.getElementById('report_type').value;
+    this.state.current_report_type = reportType;
+    await this.generateAccountingReport();
+  }
+
+  // Generate accounting report based on current settings
+  async generateAccountingReport() {
+    this.state.report_loading = true;
+    
+    try {
+      switch (this.state.current_report_type) {
+        case 'profit_loss':
+          await this.fetchProfitLossReport();
+          break;
+        case 'balance_sheet':
+          await this.fetchBalanceSheetReport();
+          break;
+        case 'trial_balance':
+          await this.fetchTrialBalanceReport();
+          break;
+      }
+    } catch (error) {
+      console.error('Error generating accounting report:', error);
+    } finally {
+      this.state.report_loading = false;
+    }
+  }
+
+  // Fetch Profit & Loss Report
+  async fetchProfitLossReport() {
+    try {
+      const result = await this.orm.call('account.financial.html.report', 'get_html', [], {
+        'report_name': 'account.financial_report_profitandloss',
+        'date_from': this.state.report_from_date,
+        'date_to': this.state.report_to_date,
+        'target_move': 'posted',
+        'display_account': 'all',
+        'context': {
+          'date_from': this.state.report_from_date,
+          'date_to': this.state.report_to_date,
+          'target_move': 'posted',
+          'display_account': 'all'
+        }
+      });
+      
+      // Parse the HTML result and extract data
+      this.state.profit_loss_data = this.parseFinancialReportData(result);
+      this.state.current_report_data = this.state.profit_loss_data;
+    } catch (error) {
+      console.error('Error fetching Profit & Loss report:', error);
+      this.state.profit_loss_data = [];
+    }
+  }
+
+  // Fetch Balance Sheet Report
+  async fetchBalanceSheetReport() {
+    try {
+      const result = await this.orm.call('account.financial.html.report', 'get_html', [], {
+        'report_name': 'account.financial_report_balancesheet',
+        'date_from': this.state.report_from_date,
+        'date_to': this.state.report_to_date,
+        'target_move': 'posted',
+        'display_account': 'all',
+        'context': {
+          'date_from': this.state.report_from_date,
+          'date_to': this.state.report_to_date,
+          'target_move': 'posted',
+          'display_account': 'all'
+        }
+      });
+      
+      // Parse the HTML result and extract data
+      const parsedData = this.parseFinancialReportData(result);
+      this.state.balance_sheet_assets = parsedData.filter(item => item.type === 'asset');
+      this.state.balance_sheet_liabilities = parsedData.filter(item => item.type === 'liability');
+      this.state.current_report_data = parsedData;
+    } catch (error) {
+      console.error('Error fetching Balance Sheet report:', error);
+      this.state.balance_sheet_assets = [];
+      this.state.balance_sheet_liabilities = [];
+    }
+  }
+
+  // Fetch Trial Balance Report
+  async fetchTrialBalanceReport() {
+    try {
+      const result = await this.orm.call('account.financial.html.report', 'get_html', [], {
+        'report_name': 'account.financial_report_trialbalance',
+        'date_from': this.state.report_from_date,
+        'date_to': this.state.report_to_date,
+        'target_move': 'posted',
+        'display_account': 'all',
+        'context': {
+          'date_from': this.state.report_from_date,
+          'date_to': this.state.report_to_date,
+          'target_move': 'posted',
+          'display_account': 'all'
+        }
+      });
+      
+      // Parse the HTML result and extract data
+      this.state.trial_balance_data = this.parseFinancialReportData(result);
+      this.state.current_report_data = this.state.trial_balance_data;
+    } catch (error) {
+      console.error('Error fetching Trial Balance report:', error);
+      this.state.trial_balance_data = [];
+    }
+  }
+
+  // Parse financial report HTML data
+  parseFinancialReportData(htmlData) {
+    // Create a temporary DOM element to parse the HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlData;
+    
+    const reportData = [];
+    const rows = tempDiv.querySelectorAll('tr');
+    
+    rows.forEach((row, index) => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length >= 3) {
+        const name = cells[0]?.textContent?.trim() || '';
+        const debit = this.parseAmount(cells[1]?.textContent?.trim() || '0');
+        const credit = this.parseAmount(cells[2]?.textContent?.trim() || '0');
+        const balance = this.parseAmount(cells[3]?.textContent?.trim() || '0');
+        
+        // Determine level based on indentation or styling
+        const level = this.determineAccountLevel(cells[0]);
+        
+        // Determine account type for balance sheet
+        const type = this.determineAccountType(name);
+        
+        if (name) {
+          reportData.push({
+            id: index,
+            name: name,
+            debit: debit,
+            credit: credit,
+            balance: balance,
+            level: level,
+            type: type
+          });
+        }
+      }
+    });
+    
+    return reportData;
+  }
+
+  // Parse amount string to number
+  parseAmount(amountStr) {
+    if (!amountStr) return 0;
+    
+    // Remove currency symbols and commas
+    const cleanStr = amountStr.replace(/[$,]/g, '').trim();
+    
+    // Handle parentheses for negative amounts
+    if (cleanStr.includes('(') && cleanStr.includes(')')) {
+      return -parseFloat(cleanStr.replace(/[()]/g, '')) || 0;
+    }
+    
+    return parseFloat(cleanStr) || 0;
+  }
+
+  // Determine account level based on indentation
+  determineAccountLevel(cell) {
+    if (!cell) return 0;
+    
+    const style = cell.getAttribute('style') || '';
+    const paddingMatch = style.match(/padding-left:\s*(\d+)px/);
+    
+    if (paddingMatch) {
+      const padding = parseInt(paddingMatch[1]);
+      if (padding >= 40) return 2; // Sub-account
+      if (padding >= 20) return 1; // Main account
+    }
+    
+    // Check for bold text (usually indicates main accounts)
+    const isBold = cell.querySelector('b, strong') || 
+                   cell.style.fontWeight === 'bold' ||
+                   cell.classList.contains('font-weight-bold');
+    
+    return isBold ? 1 : 0;
+  }
+
+  // Determine account type for balance sheet
+  determineAccountType(accountName) {
+    const name = accountName.toLowerCase();
+    
+    if (name.includes('asset') || name.includes('cash') || name.includes('bank') || 
+        name.includes('inventory') || name.includes('receivable')) {
+      return 'asset';
+    }
+    
+    if (name.includes('liability') || name.includes('payable') || name.includes('debt')) {
+      return 'liability';
+    }
+    
+    if (name.includes('equity') || name.includes('capital') || name.includes('retained')) {
+      return 'equity';
+    }
+    
+    return 'other';
+  }
+
+  // Format currency for display
+  formatCurrency(amount) {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amount);
   }
 }
 PosDashboard.template = 'PosDashboard'

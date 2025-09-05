@@ -1966,3 +1966,305 @@ h4 .stat-count {
     width: 100%;
     margin-top: 57px;
 }
+
+/* ===== ACCOUNTING REPORTS STYLES ===== */
+
+/* Accounting Reports Section */
+.accounting-reports-section {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    border-radius: 20px !important;
+    box-shadow: var(--box-shadow) !important;
+    padding: 30px !important;
+    margin: 30px 0 !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.accounting-reports-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: var(--primary-gradient);
+    z-index: 1;
+}
+
+/* Reports Header */
+.reports-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 25px !important;
+    flex-wrap: wrap !important;
+    gap: 20px !important;
+}
+
+.reports-title {
+    font-size: 1.8rem !important;
+    font-weight: 700 !important;
+    color: var(--text-primary) !important;
+    margin: 0 !important;
+    background: var(--primary-gradient) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+}
+
+.reports-controls {
+    display: flex !important;
+    gap: 20px !important;
+    align-items: end !important;
+    flex-wrap: wrap !important;
+}
+
+.report-date-selector,
+.report-type-selector {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+}
+
+.date-inputs-inline {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+
+.date-separator {
+    color: var(--text-secondary) !important;
+    font-weight: 500 !important;
+    font-size: 0.9rem !important;
+}
+
+/* Report Display Area */
+.report-display-area {
+    background: rgba(255, 255, 255, 0.7) !important;
+    border-radius: 15px !important;
+    padding: 25px !important;
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
+    min-height: 400px !important;
+    position: relative !important;
+}
+
+/* Report Content */
+.report-content {
+    animation: fadeInUp 0.5s ease-out !important;
+}
+
+.report-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 20px !important;
+    padding-bottom: 15px !important;
+    border-bottom: 2px solid rgba(102, 126, 234, 0.1) !important;
+}
+
+.report-title {
+    font-size: 1.4rem !important;
+    font-weight: 600 !important;
+    color: var(--text-primary) !important;
+    margin: 0 !important;
+}
+
+.report-period {
+    color: var(--text-secondary) !important;
+    font-size: 0.9rem !important;
+    font-weight: 500 !important;
+    background: rgba(102, 126, 234, 0.1) !important;
+    padding: 6px 12px !important;
+    border-radius: 20px !important;
+}
+
+/* Report Tables */
+.report-table-container {
+    overflow-x: auto !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+}
+
+.modern-report-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    background: white !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    font-size: 0.9rem !important;
+}
+
+.modern-report-table thead {
+    background: var(--primary-gradient) !important;
+    color: white !important;
+}
+
+.modern-report-table th {
+    padding: 15px 12px !important;
+    text-align: left !important;
+    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    border: none !important;
+}
+
+.modern-report-table td {
+    padding: 12px !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+    vertical-align: middle !important;
+    transition: var(--transition) !important;
+}
+
+.modern-report-table tbody tr:hover {
+    background: rgba(102, 126, 234, 0.05) !important;
+    transform: translateX(2px) !important;
+}
+
+.modern-report-table tbody tr:last-child td {
+    border-bottom: none !important;
+}
+
+/* Report Row Styling */
+.report-total-row {
+    background: rgba(102, 126, 234, 0.1) !important;
+    font-weight: 700 !important;
+    border-top: 2px solid var(--primary-color) !important;
+}
+
+.report-subtotal-row {
+    background: rgba(102, 126, 234, 0.05) !important;
+    font-weight: 600 !important;
+}
+
+.report-total-row td,
+.report-subtotal-row td {
+    border-bottom: 1px solid rgba(102, 126, 234, 0.2) !important;
+}
+
+/* Balance Sheet Layout */
+.balance-sheet-container {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 30px !important;
+}
+
+.balance-sheet-section {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border-radius: 12px !important;
+    padding: 20px !important;
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+.section-title {
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    color: var(--text-primary) !important;
+    margin: 0 0 15px 0 !important;
+    padding: 10px 15px !important;
+    background: var(--primary-gradient) !important;
+    color: white !important;
+    border-radius: 8px !important;
+    text-align: center !important;
+}
+
+/* Text Alignment */
+.text-right {
+    text-align: right !important;
+}
+
+.text-danger {
+    color: #e74c3c !important;
+    font-weight: 600 !important;
+}
+
+.text-success {
+    color: #27ae60 !important;
+    font-weight: 600 !important;
+}
+
+/* Loading State */
+.report-loading {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 300px !important;
+    color: var(--text-secondary) !important;
+}
+
+.loading-spinner {
+    width: 40px !important;
+    height: 40px !important;
+    border: 4px solid rgba(102, 126, 234, 0.1) !important;
+    border-left: 4px solid var(--primary-color) !important;
+    border-radius: 50% !important;
+    animation: spin 1s linear infinite !important;
+    margin-bottom: 15px !important;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* No Data State */
+.report-no-data {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 300px !important;
+    color: var(--text-secondary) !important;
+}
+
+.no-data-icon {
+    font-size: 3rem !important;
+    color: rgba(102, 126, 234, 0.3) !important;
+    margin-bottom: 15px !important;
+}
+
+/* Accounting Reports Responsive */
+@media (max-width: 768px) {
+    .accounting-reports-section {
+        padding: 20px !important;
+        margin: 20px 0 !important;
+    }
+    
+    .reports-header {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 15px !important;
+    }
+    
+    .reports-controls {
+        flex-direction: column !important;
+        gap: 15px !important;
+    }
+    
+    .date-inputs-inline {
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+    
+    .balance-sheet-container {
+        grid-template-columns: 1fr !important;
+        gap: 20px !important;
+    }
+    
+    .report-display-area {
+        padding: 15px !important;
+    }
+    
+    .modern-report-table {
+        font-size: 0.8rem !important;
+    }
+    
+    .modern-report-table th,
+    .modern-report-table td {
+        padding: 8px 6px !important;
+    }
+}
