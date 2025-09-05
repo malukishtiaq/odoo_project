@@ -812,11 +812,11 @@ export class PosDashboard extends Component {
       const accountDomain = [
         ['account_type', 'in', ['income', 'income_other', 'expense', 'expense_depreciation', 'expense_direct_cost']]
       ];
-      
+
       const accounts = await this.orm.searchRead('account.account', accountDomain, [
         'id', 'name', 'code', 'account_type'
       ]);
-      
+
       // Get move lines for these accounts in the date range
       const moveLineDomain = [
         ['date', '>=', this.state.report_from_date],
@@ -824,11 +824,11 @@ export class PosDashboard extends Component {
         ['move_id.state', '=', 'posted'],
         ['account_id', 'in', accounts.map(acc => acc.id)]
       ];
-      
+
       const moveLines = await this.orm.searchRead('account.move.line', moveLineDomain, [
         'account_id', 'debit', 'credit'
       ]);
-      
+
       // Group by account and calculate totals
       const accountTotals = {};
       accounts.forEach(account => {
@@ -841,7 +841,7 @@ export class PosDashboard extends Component {
           balance: 0
         };
       });
-      
+
       moveLines.forEach(line => {
         const accountId = line.account_id[0];
         if (accountTotals[accountId]) {
@@ -849,18 +849,18 @@ export class PosDashboard extends Component {
           accountTotals[accountId].credit += line.credit || 0;
         }
       });
-      
+
       // Calculate balance (credit - debit for income, debit - credit for expense)
       Object.values(accountTotals).forEach(account => {
-        if (account.name.toLowerCase().includes('income') || 
-            account.name.toLowerCase().includes('revenue') ||
-            account.name.toLowerCase().includes('sales')) {
+        if (account.name.toLowerCase().includes('income') ||
+          account.name.toLowerCase().includes('revenue') ||
+          account.name.toLowerCase().includes('sales')) {
           account.balance = account.credit - account.debit;
         } else {
           account.balance = account.debit - account.credit;
         }
       });
-      
+
       // Convert to array and format
       this.state.profit_loss_data = Object.values(accountTotals).map(account => ({
         id: account.id,
@@ -871,9 +871,9 @@ export class PosDashboard extends Component {
         level: 1,
         type: 'income_expense'
       }));
-      
+
       this.state.current_report_data = this.state.profit_loss_data;
-      
+
     } catch (error) {
       console.error('Error fetching Profit & Loss report:', error);
       this.state.profit_loss_data = [];
@@ -887,22 +887,22 @@ export class PosDashboard extends Component {
       const accountDomain = [
         ['account_type', 'in', ['asset_receivable', 'asset_cash', 'asset_current', 'asset_non_current', 'asset_prepayments', 'asset_fixed', 'liability_payable', 'liability_credit_card', 'liability_current', 'liability_non_current', 'equity', 'equity_unaffected']]
       ];
-      
+
       const accounts = await this.orm.searchRead('account.account', accountDomain, [
         'id', 'name', 'code', 'account_type'
       ]);
-      
+
       // Get move lines for these accounts up to the end date
       const moveLineDomain = [
         ['date', '<=', this.state.report_to_date],
         ['move_id.state', '=', 'posted'],
         ['account_id', 'in', accounts.map(acc => acc.id)]
       ];
-      
+
       const moveLines = await this.orm.searchRead('account.move.line', moveLineDomain, [
         'account_id', 'debit', 'credit'
       ]);
-      
+
       // Group by account and calculate totals
       const accountTotals = {};
       accounts.forEach(account => {
@@ -916,7 +916,7 @@ export class PosDashboard extends Component {
           balance: 0
         };
       });
-      
+
       moveLines.forEach(line => {
         const accountId = line.account_id[0];
         if (accountTotals[accountId]) {
@@ -924,7 +924,7 @@ export class PosDashboard extends Component {
           accountTotals[accountId].credit += line.credit || 0;
         }
       });
-      
+
       // Calculate balance based on account type
       Object.values(accountTotals).forEach(account => {
         if (account.account_type.startsWith('asset')) {
@@ -935,7 +935,7 @@ export class PosDashboard extends Component {
           account.balance = account.credit - account.debit;
         }
       });
-      
+
       // Convert to array and format
       const allData = Object.values(accountTotals).map(account => ({
         id: account.id,
@@ -946,11 +946,11 @@ export class PosDashboard extends Component {
         level: 1,
         type: account.account_type.startsWith('asset') ? 'asset' : 'liability'
       }));
-      
+
       this.state.balance_sheet_assets = allData.filter(item => item.type === 'asset');
       this.state.balance_sheet_liabilities = allData.filter(item => item.type === 'liability');
       this.state.current_report_data = allData;
-      
+
     } catch (error) {
       console.error('Error fetching Balance Sheet report:', error);
       this.state.balance_sheet_assets = [];
@@ -965,7 +965,7 @@ export class PosDashboard extends Component {
       const accounts = await this.orm.searchRead('account.account', [], [
         'id', 'name', 'code', 'account_type'
       ]);
-      
+
       // Get move lines for these accounts in the date range
       const moveLineDomain = [
         ['date', '>=', this.state.report_from_date],
@@ -973,11 +973,11 @@ export class PosDashboard extends Component {
         ['move_id.state', '=', 'posted'],
         ['account_id', 'in', accounts.map(acc => acc.id)]
       ];
-      
+
       const moveLines = await this.orm.searchRead('account.move.line', moveLineDomain, [
         'account_id', 'debit', 'credit'
       ]);
-      
+
       // Group by account and calculate totals
       const accountTotals = {};
       accounts.forEach(account => {
@@ -991,7 +991,7 @@ export class PosDashboard extends Component {
           balance: 0
         };
       });
-      
+
       moveLines.forEach(line => {
         const accountId = line.account_id[0];
         if (accountTotals[accountId]) {
@@ -999,7 +999,7 @@ export class PosDashboard extends Component {
           accountTotals[accountId].credit += line.credit || 0;
         }
       });
-      
+
       // Calculate balance based on account type
       Object.values(accountTotals).forEach(account => {
         if (account.account_type.startsWith('asset')) {
@@ -1013,7 +1013,7 @@ export class PosDashboard extends Component {
           account.balance = account.credit - account.debit;
         }
       });
-      
+
       // Convert to array and format
       this.state.trial_balance_data = Object.values(accountTotals).map(account => ({
         id: account.id,
@@ -1024,9 +1024,9 @@ export class PosDashboard extends Component {
         level: 1,
         type: this.determineAccountType(account.name)
       }));
-      
+
       this.state.current_report_data = this.state.trial_balance_data;
-      
+
     } catch (error) {
       console.error('Error fetching Trial Balance report:', error);
       this.state.trial_balance_data = [];

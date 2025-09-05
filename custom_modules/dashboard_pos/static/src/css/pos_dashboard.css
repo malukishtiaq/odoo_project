@@ -2207,8 +2207,13 @@ h4 .stat-count {
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* No Data State */
@@ -2233,36 +2238,36 @@ h4 .stat-count {
         padding: 20px !important;
         margin: 20px 0 !important;
     }
-    
+
     .reports-header {
         flex-direction: column !important;
         align-items: stretch !important;
         gap: 15px !important;
     }
-    
+
     .reports-controls {
         flex-direction: column !important;
         gap: 15px !important;
     }
-    
+
     .date-inputs-inline {
         flex-direction: column !important;
         gap: 10px !important;
     }
-    
+
     .balance-sheet-container {
         grid-template-columns: 1fr !important;
         gap: 20px !important;
     }
-    
+
     .report-display-area {
         padding: 15px !important;
     }
-    
+
     .modern-report-table {
         font-size: 0.8rem !important;
     }
-    
+
     .modern-report-table th,
     .modern-report-table td {
         padding: 8px 6px !important;
