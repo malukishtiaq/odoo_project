@@ -379,7 +379,7 @@ export class PosDashboard extends Component {
     //  Modern Sale bar chart with advanced styling
     var option = $(events.target).val();
     var self = this
-    var ctx = $("#canvas_1");
+    var ctx = document.getElementById("canvas_1").getContext("2d");
     this.orm.call('pos.order', 'get_department', [option])
       .then(function (arrays) {
         var data = {
@@ -813,19 +813,19 @@ export class PosDashboard extends Component {
         ['date', '>=', this.state.report_from_date],
         ['date', '<=', this.state.report_to_date],
         ['move_id.state', '=', 'posted'],
-        ['account_id.user_type_id.type', 'in', ['income', 'expense']]
+        ['account_id.account_type', 'in', ['income', 'income_other', 'expense', 'expense_depreciation', 'expense_direct_cost']]
       ];
-      
+
       const moveLines = await this.orm.searchRead('account.move.line', domain, [
         'account_id', 'debit', 'credit', 'balance'
       ]);
-      
+
       // Group by account and calculate totals
       const accountTotals = {};
       moveLines.forEach(line => {
         const accountId = line.account_id[0];
         const accountName = line.account_id[1];
-        
+
         if (!accountTotals[accountId]) {
           accountTotals[accountId] = {
             id: accountId,
@@ -835,12 +835,12 @@ export class PosDashboard extends Component {
             balance: 0
           };
         }
-        
+
         accountTotals[accountId].debit += line.debit || 0;
         accountTotals[accountId].credit += line.credit || 0;
         accountTotals[accountId].balance += line.balance || 0;
       });
-      
+
       // Convert to array and format
       this.state.profit_loss_data = Object.values(accountTotals).map(account => ({
         id: account.id,
@@ -851,9 +851,9 @@ export class PosDashboard extends Component {
         level: 1,
         type: 'income_expense'
       }));
-      
+
       this.state.current_report_data = this.state.profit_loss_data;
-      
+
     } catch (error) {
       console.error('Error fetching Profit & Loss report:', error);
       this.state.profit_loss_data = [];
@@ -867,19 +867,19 @@ export class PosDashboard extends Component {
       const domain = [
         ['date', '<=', this.state.report_to_date],
         ['move_id.state', '=', 'posted'],
-        ['account_id.user_type_id.type', 'in', ['asset', 'liability', 'equity']]
+        ['account_id.account_type', 'in', ['asset_receivable', 'asset_cash', 'asset_current', 'asset_non_current', 'asset_prepayments', 'asset_fixed', 'liability_payable', 'liability_credit_card', 'liability_current', 'liability_non_current', 'equity', 'equity_unaffected']]
       ];
-      
+
       const moveLines = await this.orm.searchRead('account.move.line', domain, [
         'account_id', 'debit', 'credit', 'balance'
       ]);
-      
+
       // Group by account and calculate totals
       const accountTotals = {};
       moveLines.forEach(line => {
         const accountId = line.account_id[0];
         const accountName = line.account_id[1];
-        
+
         if (!accountTotals[accountId]) {
           accountTotals[accountId] = {
             id: accountId,
@@ -889,12 +889,12 @@ export class PosDashboard extends Component {
             balance: 0
           };
         }
-        
+
         accountTotals[accountId].debit += line.debit || 0;
         accountTotals[accountId].credit += line.credit || 0;
         accountTotals[accountId].balance += line.balance || 0;
       });
-      
+
       // Convert to array and format
       const allData = Object.values(accountTotals).map(account => ({
         id: account.id,
@@ -905,11 +905,11 @@ export class PosDashboard extends Component {
         level: 1,
         type: this.determineAccountType(account.name)
       }));
-      
+
       this.state.balance_sheet_assets = allData.filter(item => item.type === 'asset');
       this.state.balance_sheet_liabilities = allData.filter(item => item.type === 'liability');
       this.state.current_report_data = allData;
-      
+
     } catch (error) {
       console.error('Error fetching Balance Sheet report:', error);
       this.state.balance_sheet_assets = [];
@@ -926,17 +926,17 @@ export class PosDashboard extends Component {
         ['date', '<=', this.state.report_to_date],
         ['move_id.state', '=', 'posted']
       ];
-      
+
       const moveLines = await this.orm.searchRead('account.move.line', domain, [
         'account_id', 'debit', 'credit', 'balance'
       ]);
-      
+
       // Group by account and calculate totals
       const accountTotals = {};
       moveLines.forEach(line => {
         const accountId = line.account_id[0];
         const accountName = line.account_id[1];
-        
+
         if (!accountTotals[accountId]) {
           accountTotals[accountId] = {
             id: accountId,
@@ -946,12 +946,12 @@ export class PosDashboard extends Component {
             balance: 0
           };
         }
-        
+
         accountTotals[accountId].debit += line.debit || 0;
         accountTotals[accountId].credit += line.credit || 0;
         accountTotals[accountId].balance += line.balance || 0;
       });
-      
+
       // Convert to array and format
       this.state.trial_balance_data = Object.values(accountTotals).map(account => ({
         id: account.id,
@@ -962,9 +962,9 @@ export class PosDashboard extends Component {
         level: 1,
         type: this.determineAccountType(account.name)
       }));
-      
+
       this.state.current_report_data = this.state.trial_balance_data;
-      
+
     } catch (error) {
       console.error('Error fetching Trial Balance report:', error);
       this.state.trial_balance_data = [];
@@ -974,24 +974,24 @@ export class PosDashboard extends Component {
   // Parse report lines data from financial.report
   parseReportLines(reportLines) {
     const reportData = [];
-    
+
     if (!reportLines || !Array.isArray(reportLines)) {
       return reportData;
     }
-    
+
     reportLines.forEach((line, index) => {
       if (line && line.name) {
         const name = line.name || '';
         const debit = this.parseAmount(line.debit || 0);
         const credit = this.parseAmount(line.credit || 0);
         const balance = this.parseAmount(line.balance || 0);
-        
+
         // Determine level from the line data
         const level = line.level || 1;
-        
+
         // Determine account type for balance sheet
         const type = this.determineAccountType(name);
-        
+
         reportData.push({
           id: line.id || index,
           name: name,
@@ -1003,7 +1003,7 @@ export class PosDashboard extends Component {
         });
       }
     });
-    
+
     return reportData;
   }
 
