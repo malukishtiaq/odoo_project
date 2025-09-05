@@ -1,0 +1,339 @@
+/* Modern POS Product Cards Redesign */
+
+// CSS Variables for consistent theming
+:root {
+    --gl-primary-color: #667eea;
+    --gl-primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gl-secondary-color: #f093fb;
+    --gl-success-color: #4facfe;
+    --gl-warning-color: #43e97b;
+    --gl-danger-color: #fa709a;
+    --gl-info-color: #a8edea;
+    --gl-dark-color: #2c3e50;
+    --gl-light-color: #ecf0f1;
+    --gl-border-radius: 16px;
+    --gl-box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    --gl-box-shadow-hover: 0 15px 35px rgba(0, 0, 0, 0.2);
+    --gl-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Modern Product Grid Styling */
+.gl-modern-product-grid {
+    padding: 25px !important;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
+    min-height: 100vh !important;
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+    gap: 20px !important;
+    align-items: start !important;
+}
+
+/* Add subtle animation to grid */
+.gl-modern-product-grid .gl-modern-product-card {
+    animation: fadeInUp 0.6s ease-out forwards !important;
+    opacity: 0 !important;
+    transform: translateY(30px) !important;
+}
+
+.gl-modern-product-grid .gl-modern-product-card:nth-child(1) {
+    animation-delay: 0.1s !important;
+}
+
+.gl-modern-product-grid .gl-modern-product-card:nth-child(2) {
+    animation-delay: 0.2s !important;
+}
+
+.gl-modern-product-grid .gl-modern-product-card:nth-child(3) {
+    animation-delay: 0.3s !important;
+}
+
+.gl-modern-product-grid .gl-modern-product-card:nth-child(4) {
+    animation-delay: 0.4s !important;
+}
+
+.gl-modern-product-grid .gl-modern-product-card:nth-child(5) {
+    animation-delay: 0.5s !important;
+}
+
+.gl-modern-product-grid .gl-modern-product-card:nth-child(6) {
+    animation-delay: 0.6s !important;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1 !important;
+        transform: translateY(0) !important;
+    }
+}
+
+/* Modern Product Card Styling */
+.gl-modern-product-card {
+    background: rgba(255, 255, 255, 0.98) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), 0 1px 8px rgba(0, 0, 0, 0.05) !important;
+    transition: var(--gl-transition) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    min-height: 280px !important;
+    margin: 15px !important;
+    padding: 25px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: var(--gl-primary-gradient);
+        transform: scaleX(0);
+        transition: transform 0.4s ease;
+        z-index: 1;
+        border-radius: 20px 20px 0 0;
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(102, 126, 234, 0.05) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 0;
+    }
+
+    &:hover {
+        transform: translateY(-12px) scale(1.03) !important;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 5px 15px rgba(0, 0, 0, 0.1) !important;
+        border-color: rgba(102, 126, 234, 0.4) !important;
+
+        &::before {
+            transform: scaleX(1);
+        }
+
+        &::after {
+            opacity: 1;
+        }
+    }
+}
+
+/* Product Content Styling */
+.gl-modern-product-card main {
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    flex: 1 !important;
+    z-index: 2 !important;
+    position: relative !important;
+}
+
+.gl-modern-product-card aside {
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 2 !important;
+    position: relative !important;
+}
+
+/* Product Name Styling */
+.gl-modern-product-card .h5 {
+    color: var(--gl-dark-color) !important;
+    font-weight: 700 !important;
+    font-size: 1.3rem !important;
+    margin-bottom: 12px !important;
+    line-height: 1.4 !important;
+    text-align: center !important;
+    display: block !important;
+    width: 100% !important;
+}
+
+/* Product Code Styling */
+.gl-modern-product-card span {
+    color: #6c757d !important;
+    font-size: 0.95rem !important;
+    font-weight: 500 !important;
+    text-align: center !important;
+    display: block !important;
+    margin-bottom: 8px !important;
+    background: rgba(108, 117, 125, 0.1) !important;
+    padding: 4px 12px !important;
+    border-radius: 20px !important;
+    width: fit-content !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* Product Price Styling */
+.gl-modern-product-card strong {
+    color: var(--gl-primary-color) !important;
+    font-weight: 800 !important;
+    font-size: 1.4rem !important;
+    text-align: center !important;
+    display: block !important;
+    margin-top: 8px !important;
+    background: linear-gradient(135deg, var(--gl-primary-color), #764ba2) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+}
+
+/* Product Image Styling */
+.gl-modern-product-card img {
+    border-radius: 16px !important;
+    transition: var(--gl-transition) !important;
+    max-height: 140px !important;
+    max-width: 140px !important;
+    object-fit: cover !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1) !important;
+    border: 3px solid rgba(255, 255, 255, 0.8) !important;
+    margin-bottom: 15px !important;
+}
+
+.gl-modern-product-card:hover img {
+    transform: scale(1.08) rotate(2deg) !important;
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15) !important;
+    border-color: rgba(102, 126, 234, 0.3) !important;
+}
+
+/* Favorite Button Styling */
+.gl-modern-product-card .o_boolean_favorite {
+    color: #ffc107 !important;
+    font-size: 1.4rem !important;
+    transition: var(--gl-transition) !important;
+    background: rgba(255, 193, 7, 0.1) !important;
+    border-radius: 50% !important;
+    width: 40px !important;
+    height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-bottom: 10px !important;
+    border: 2px solid rgba(255, 193, 7, 0.3) !important;
+}
+
+.gl-modern-product-card .o_boolean_favorite:hover {
+    color: #ff8c00 !important;
+    transform: scale(1.15) !important;
+    background: rgba(255, 193, 7, 0.2) !important;
+    border-color: rgba(255, 193, 7, 0.5) !important;
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3) !important;
+}
+
+/* Progress Bar Styling */
+.gl-modern-product-card .o_kanban_progressbar {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-radius: 15px !important;
+    height: 8px !important;
+    margin-top: 15px !important;
+    width: 100% !important;
+    overflow: hidden !important;
+}
+
+.gl-modern-product-card .o_kanban_progressbar .o_kanban_progressbar_fill {
+    background: var(--gl-primary-gradient) !important;
+    border-radius: 15px !important;
+    transition: var(--gl-transition) !important;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3) !important;
+}
+
+/* Animations */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.hover-lift {
+    transition: var(--gl-transition) !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .gl-modern-product-card {
+        min-height: 240px !important;
+        padding: 20px !important;
+        margin: 10px !important;
+    }
+
+    .gl-modern-product-card .h5 {
+        font-size: 1.1rem !important;
+    }
+
+    .gl-modern-product-card img {
+        max-height: 120px !important;
+        max-width: 120px !important;
+    }
+
+    .gl-modern-product-card span {
+        font-size: 0.85rem !important;
+        padding: 3px 10px !important;
+    }
+
+    .gl-modern-product-card strong {
+        font-size: 1.2rem !important;
+    }
+}
+
+@media (min-width: 1200px) {
+    .gl-modern-product-card {
+        min-height: 320px !important;
+        padding: 30px !important;
+        margin: 20px !important;
+    }
+
+    .gl-modern-product-card .h5 {
+        font-size: 1.4rem !important;
+    }
+
+    .gl-modern-product-card img {
+        max-height: 160px !important;
+        max-width: 160px !important;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .gl-modern-product-grid {
+        background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%) !important;
+    }
+
+    .gl-modern-product-card {
+        background: rgba(45, 55, 72, 0.95) !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .gl-modern-product-card .h5 {
+        color: #e2e8f0 !important;
+    }
+
+    .gl-modern-product-card span {
+        color: #a0aec0 !important;
+    }
+}

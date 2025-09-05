@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    
+    <!-- Inherit and modify the Product Template Kanban Card -->
+    <t t-name="product.product_template_kanban_view.card" t-inherit="product.product_template_kanban_view.card" t-inherit-mode="primary">
+        <xpath expr="//t[@t-name='card']" position="attributes">
+            <attribute name="class">gl-modern-product-card flex-row</attribute>
+        </xpath>
+        
+        <!-- Add modern styling to the main content -->
+        <xpath expr="//main" position="attributes">
+            <attribute name="class">gl-product-main pe-2</attribute>
+        </xpath>
+        
+        <!-- Add modern styling to the aside (image) -->
+        <xpath expr="//aside" position="attributes">
+            <attribute name="class">gl-product-aside</attribute>
+        </xpath>
+    </t>
+    
+</templates>
