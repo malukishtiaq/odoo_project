@@ -190,7 +190,7 @@
                         <div class="report-type-selector">
                             <label class="date-label">Report Type</label>
                             <select class="modern-select" id="report_type" t-on-change="onReportTypeChange">
-                                <option value="profit_loss">Profit & Loss</option>
+                                <option value="profit_loss">Profit &amp; Loss</option>
                                 <option value="balance_sheet">Balance Sheet</option>
                                 <option value="trial_balance">Trial Balance</option>
                             </select>
@@ -200,10 +200,10 @@
 
                 <!-- Report Display Area -->
                 <div class="report-display-area">
-                    <!-- Profit & Loss Report -->
+                    <!-- Profit &amp; Loss Report -->
                     <div class="report-content" t-if="state.current_report_type === 'profit_loss'">
                         <div class="report-header">
-                            <h4 class="report-title">Profit & Loss Statement</h4>
+                            <h4 class="report-title">Profit &amp; Loss Statement</h4>
                             <div class="report-period">
                                 <t t-esc="state.report_from_date"/> to <t t-esc="state.report_to_date"/>
                             </div>
@@ -273,7 +273,7 @@
                                 </table>
                             </div>
                             <div class="balance-sheet-section">
-                                <h5 class="section-title">LIABILITIES & EQUITY</h5>
+                                <h5 class="section-title">LIABILITIES &amp; EQUITY</h5>
                                 <table class="modern-report-table">
                                     <thead>
                                         <tr>
