@@ -808,52 +808,72 @@ export class PosDashboard extends Component {
   // Fetch Profit & Loss Report
   async fetchProfitLossReport() {
     try {
-      // Get account move lines for the date range
-      const domain = [
+      // Get accounts of income and expense types
+      const accountDomain = [
+        ['account_type', 'in', ['income', 'income_other', 'expense', 'expense_depreciation', 'expense_direct_cost']]
+      ];
+      
+      const accounts = await this.orm.searchRead('account.account', accountDomain, [
+        'id', 'name', 'code', 'account_type'
+      ]);
+      
+      // Get move lines for these accounts in the date range
+      const moveLineDomain = [
         ['date', '>=', this.state.report_from_date],
         ['date', '<=', this.state.report_to_date],
         ['move_id.state', '=', 'posted'],
-        ['account_id.account_type', 'in', ['income', 'income_other', 'expense', 'expense_depreciation', 'expense_direct_cost']]
+        ['account_id', 'in', accounts.map(acc => acc.id)]
       ];
-
-      const moveLines = await this.orm.searchRead('account.move.line', domain, [
-        'account_id', 'debit', 'credit', 'balance'
+      
+      const moveLines = await this.orm.searchRead('account.move.line', moveLineDomain, [
+        'account_id', 'debit', 'credit'
       ]);
-
+      
       // Group by account and calculate totals
       const accountTotals = {};
+      accounts.forEach(account => {
+        accountTotals[account.id] = {
+          id: account.id,
+          name: account.name,
+          code: account.code,
+          debit: 0,
+          credit: 0,
+          balance: 0
+        };
+      });
+      
       moveLines.forEach(line => {
         const accountId = line.account_id[0];
-        const accountName = line.account_id[1];
-
-        if (!accountTotals[accountId]) {
-          accountTotals[accountId] = {
-            id: accountId,
-            name: accountName,
-            debit: 0,
-            credit: 0,
-            balance: 0
-          };
+        if (accountTotals[accountId]) {
+          accountTotals[accountId].debit += line.debit || 0;
+          accountTotals[accountId].credit += line.credit || 0;
         }
-
-        accountTotals[accountId].debit += line.debit || 0;
-        accountTotals[accountId].credit += line.credit || 0;
-        accountTotals[accountId].balance += line.balance || 0;
       });
-
+      
+      // Calculate balance (credit - debit for income, debit - credit for expense)
+      Object.values(accountTotals).forEach(account => {
+        if (account.name.toLowerCase().includes('income') || 
+            account.name.toLowerCase().includes('revenue') ||
+            account.name.toLowerCase().includes('sales')) {
+          account.balance = account.credit - account.debit;
+        } else {
+          account.balance = account.debit - account.credit;
+        }
+      });
+      
       // Convert to array and format
       this.state.profit_loss_data = Object.values(accountTotals).map(account => ({
         id: account.id,
-        name: account.name,
+        name: `${account.code} - ${account.name}`,
         debit: this.formatCurrency(account.debit),
         credit: this.formatCurrency(account.credit),
         balance: this.formatCurrency(account.balance),
         level: 1,
         type: 'income_expense'
       }));
-
+      
       this.state.current_report_data = this.state.profit_loss_data;
-
+      
     } catch (error) {
       console.error('Error fetching Profit & Loss report:', error);
       this.state.profit_loss_data = [];
@@ -863,53 +883,74 @@ export class PosDashboard extends Component {
   // Fetch Balance Sheet Report
   async fetchBalanceSheetReport() {
     try {
-      // Get account move lines for assets and liabilities
-      const domain = [
+      // Get accounts of asset, liability, and equity types
+      const accountDomain = [
+        ['account_type', 'in', ['asset_receivable', 'asset_cash', 'asset_current', 'asset_non_current', 'asset_prepayments', 'asset_fixed', 'liability_payable', 'liability_credit_card', 'liability_current', 'liability_non_current', 'equity', 'equity_unaffected']]
+      ];
+      
+      const accounts = await this.orm.searchRead('account.account', accountDomain, [
+        'id', 'name', 'code', 'account_type'
+      ]);
+      
+      // Get move lines for these accounts up to the end date
+      const moveLineDomain = [
         ['date', '<=', this.state.report_to_date],
         ['move_id.state', '=', 'posted'],
-        ['account_id.account_type', 'in', ['asset_receivable', 'asset_cash', 'asset_current', 'asset_non_current', 'asset_prepayments', 'asset_fixed', 'liability_payable', 'liability_credit_card', 'liability_current', 'liability_non_current', 'equity', 'equity_unaffected']]
+        ['account_id', 'in', accounts.map(acc => acc.id)]
       ];
-
-      const moveLines = await this.orm.searchRead('account.move.line', domain, [
-        'account_id', 'debit', 'credit', 'balance'
+      
+      const moveLines = await this.orm.searchRead('account.move.line', moveLineDomain, [
+        'account_id', 'debit', 'credit'
       ]);
-
+      
       // Group by account and calculate totals
       const accountTotals = {};
+      accounts.forEach(account => {
+        accountTotals[account.id] = {
+          id: account.id,
+          name: account.name,
+          code: account.code,
+          account_type: account.account_type,
+          debit: 0,
+          credit: 0,
+          balance: 0
+        };
+      });
+      
       moveLines.forEach(line => {
         const accountId = line.account_id[0];
-        const accountName = line.account_id[1];
-
-        if (!accountTotals[accountId]) {
-          accountTotals[accountId] = {
-            id: accountId,
-            name: accountName,
-            debit: 0,
-            credit: 0,
-            balance: 0
-          };
+        if (accountTotals[accountId]) {
+          accountTotals[accountId].debit += line.debit || 0;
+          accountTotals[accountId].credit += line.credit || 0;
         }
-
-        accountTotals[accountId].debit += line.debit || 0;
-        accountTotals[accountId].credit += line.credit || 0;
-        accountTotals[accountId].balance += line.balance || 0;
       });
-
+      
+      // Calculate balance based on account type
+      Object.values(accountTotals).forEach(account => {
+        if (account.account_type.startsWith('asset')) {
+          // Assets: debit - credit
+          account.balance = account.debit - account.credit;
+        } else if (account.account_type.startsWith('liability') || account.account_type.startsWith('equity')) {
+          // Liabilities and Equity: credit - debit
+          account.balance = account.credit - account.debit;
+        }
+      });
+      
       // Convert to array and format
       const allData = Object.values(accountTotals).map(account => ({
         id: account.id,
-        name: account.name,
+        name: `${account.code} - ${account.name}`,
         debit: this.formatCurrency(account.debit),
         credit: this.formatCurrency(account.credit),
         balance: this.formatCurrency(account.balance),
         level: 1,
-        type: this.determineAccountType(account.name)
+        type: account.account_type.startsWith('asset') ? 'asset' : 'liability'
       }));
-
+      
       this.state.balance_sheet_assets = allData.filter(item => item.type === 'asset');
       this.state.balance_sheet_liabilities = allData.filter(item => item.type === 'liability');
       this.state.current_report_data = allData;
-
+      
     } catch (error) {
       console.error('Error fetching Balance Sheet report:', error);
       this.state.balance_sheet_assets = [];
@@ -920,51 +961,72 @@ export class PosDashboard extends Component {
   // Fetch Trial Balance Report
   async fetchTrialBalanceReport() {
     try {
-      // Get all account move lines for the date range
-      const domain = [
+      // Get all accounts
+      const accounts = await this.orm.searchRead('account.account', [], [
+        'id', 'name', 'code', 'account_type'
+      ]);
+      
+      // Get move lines for these accounts in the date range
+      const moveLineDomain = [
         ['date', '>=', this.state.report_from_date],
         ['date', '<=', this.state.report_to_date],
-        ['move_id.state', '=', 'posted']
+        ['move_id.state', '=', 'posted'],
+        ['account_id', 'in', accounts.map(acc => acc.id)]
       ];
-
-      const moveLines = await this.orm.searchRead('account.move.line', domain, [
-        'account_id', 'debit', 'credit', 'balance'
+      
+      const moveLines = await this.orm.searchRead('account.move.line', moveLineDomain, [
+        'account_id', 'debit', 'credit'
       ]);
-
+      
       // Group by account and calculate totals
       const accountTotals = {};
+      accounts.forEach(account => {
+        accountTotals[account.id] = {
+          id: account.id,
+          name: account.name,
+          code: account.code,
+          account_type: account.account_type,
+          debit: 0,
+          credit: 0,
+          balance: 0
+        };
+      });
+      
       moveLines.forEach(line => {
         const accountId = line.account_id[0];
-        const accountName = line.account_id[1];
-
-        if (!accountTotals[accountId]) {
-          accountTotals[accountId] = {
-            id: accountId,
-            name: accountName,
-            debit: 0,
-            credit: 0,
-            balance: 0
-          };
+        if (accountTotals[accountId]) {
+          accountTotals[accountId].debit += line.debit || 0;
+          accountTotals[accountId].credit += line.credit || 0;
         }
-
-        accountTotals[accountId].debit += line.debit || 0;
-        accountTotals[accountId].credit += line.credit || 0;
-        accountTotals[accountId].balance += line.balance || 0;
       });
-
+      
+      // Calculate balance based on account type
+      Object.values(accountTotals).forEach(account => {
+        if (account.account_type.startsWith('asset')) {
+          // Assets: debit - credit
+          account.balance = account.debit - account.credit;
+        } else if (account.account_type.startsWith('liability') || account.account_type.startsWith('equity')) {
+          // Liabilities and Equity: credit - debit
+          account.balance = account.credit - account.debit;
+        } else {
+          // Income and Expense: credit - debit
+          account.balance = account.credit - account.debit;
+        }
+      });
+      
       // Convert to array and format
       this.state.trial_balance_data = Object.values(accountTotals).map(account => ({
         id: account.id,
-        name: account.name,
+        name: `${account.code} - ${account.name}`,
         debit: this.formatCurrency(account.debit),
         credit: this.formatCurrency(account.credit),
         balance: this.formatCurrency(account.balance),
         level: 1,
         type: this.determineAccountType(account.name)
       }));
-
+      
       this.state.current_report_data = this.state.trial_balance_data;
-
+      
     } catch (error) {
       console.error('Error fetching Trial Balance report:', error);
       this.state.trial_balance_data = [];
