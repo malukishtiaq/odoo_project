@@ -63,6 +63,15 @@ export class PosDashboard extends Component {
       pos_total_amount: '0.00',
       pos_avg_order: '0.00',
       pos_top_products: [],
+      // Pricing Scenarios State
+      pricing_scenarios_loading: false,
+      pricing_scenarios_data: null,
+      pricing_scenarios_month: null,
+      pricing_scenarios_available_months: [],
+      pricing_scenarios_current_tab: 'break_even',
+      pricing_scenarios_weighting_mode: 'uniform', // 'uniform' or 'weighted'
+      pricing_scenarios_custom_target: 25000,
+      pricing_scenarios_error: null,
     });
     // When the component is about to start, fetch data in tiles
     onWillStart(async () => {
@@ -82,6 +91,9 @@ export class PosDashboard extends Component {
       // Generate default reports
       await this.generatePosReport();
       await this.generateAccountingReport();
+
+      // Load pricing scenarios data
+      await this.loadPricingScenariosAvailableMonths();
 
       // Add entrance animations
       this.addEntranceAnimations();
@@ -830,11 +842,11 @@ export class PosDashboard extends Component {
       const accountDomain = [
         ['account_type', 'in', ['income', 'income_other', 'expense', 'expense_depreciation', 'expense_direct_cost']]
       ];
-      
+
       const accounts = await this.orm.searchRead('account.account', accountDomain, [
         'id', 'name', 'code', 'account_type'
       ]);
-      
+
       console.log('Found accounts:', accounts.length);
 
       // Get move lines for these accounts in the date range
@@ -891,7 +903,7 @@ export class PosDashboard extends Component {
         level: 1,
         type: 'income_expense'
       }));
-      
+
       console.log('Profit & Loss data:', this.state.profit_loss_data);
       this.state.current_report_data = this.state.profit_loss_data;
 
@@ -1157,12 +1169,12 @@ export class PosDashboard extends Component {
   }
 
   // ===== POS ORDER REPORT METHODS =====
-  
+
   // Handle POS date change
   async onPosDateChange() {
     const fromDate = document.getElementById('pos_from_date').value;
     const toDate = document.getElementById('pos_to_date').value;
-    
+
     if (fromDate && toDate) {
       this.state.pos_from_date = fromDate;
       this.state.pos_to_date = toDate;
@@ -1172,7 +1184,7 @@ export class PosDashboard extends Component {
   // Generate POS Order Report
   async generatePosReport() {
     this.state.pos_report_loading = true;
-    
+
     try {
       await this.fetchPosOrderData();
       await this.fetchTopSellingProducts();
@@ -1192,21 +1204,21 @@ export class PosDashboard extends Component {
         ['date_order', '<=', this.state.pos_to_date + ' 23:59:59'],
         ['state', 'in', ['paid', 'done', 'invoiced']]
       ];
-      
+
       const orders = await this.orm.searchRead('pos.order', domain, [
         'id', 'amount_total', 'date_order'
       ]);
-      
+
       // Calculate totals
       const totalOrders = orders.length;
       const totalAmount = orders.reduce((sum, order) => sum + (order.amount_total || 0), 0);
       const avgOrder = totalOrders > 0 ? totalAmount / totalOrders : 0;
-      
+
       // Update state
       this.state.pos_total_orders = totalOrders;
       this.state.pos_total_amount = this.formatCurrency(totalAmount);
       this.state.pos_avg_order = this.formatCurrency(avgOrder);
-      
+
     } catch (error) {
       console.error('Error fetching POS order data:', error);
       this.state.pos_total_orders = 0;
@@ -1224,17 +1236,17 @@ export class PosDashboard extends Component {
         ['order_id.date_order', '<=', this.state.pos_to_date + ' 23:59:59'],
         ['order_id.state', 'in', ['paid', 'done', 'invoiced']]
       ];
-      
+
       const orderLines = await this.orm.searchRead('pos.order.line', domain, [
         'product_id', 'qty', 'price_subtotal'
       ]);
-      
+
       // Group by product and calculate totals
       const productTotals = {};
       orderLines.forEach(line => {
         const productId = line.product_id[0];
         const productName = line.product_id[1];
-        
+
         if (!productTotals[productId]) {
           productTotals[productId] = {
             id: productId,
@@ -1243,19 +1255,19 @@ export class PosDashboard extends Component {
             amount: 0
           };
         }
-        
+
         productTotals[productId].quantity += line.qty || 0;
         productTotals[productId].amount += line.price_subtotal || 0;
       });
-      
+
       // Convert to array and sort by quantity
       const products = Object.values(productTotals)
         .sort((a, b) => b.quantity - a.quantity)
         .slice(0, 3); // Top 3 only
-      
+
       // Calculate percentages for mini bars
       const maxQuantity = products.length > 0 ? products[0].quantity : 1;
-      
+
       // Format and add ranking
       this.state.pos_top_products = products.map((product, index) => ({
         id: product.id,
@@ -1265,11 +1277,377 @@ export class PosDashboard extends Component {
         rank: index + 1,
         percentage: maxQuantity > 0 ? (product.quantity / maxQuantity) * 100 : 0
       }));
-      
+
     } catch (error) {
       console.error('Error fetching top selling products:', error);
       this.state.pos_top_products = [];
     }
+  }
+
+  // ===== PRICING SCENARIOS METHODS =====
+
+  // Load available months for pricing scenarios
+  async loadPricingScenariosAvailableMonths() {
+    try {
+      const response = await fetch('/api/pricing-scenarios/available-months', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        this.state.pricing_scenarios_available_months = data.available_months || [];
+
+        // Set default month to the most recent available month
+        if (this.state.pricing_scenarios_available_months.length > 0) {
+          this.state.pricing_scenarios_month = this.state.pricing_scenarios_available_months[0].month;
+        }
+      } else {
+        console.error('Failed to load available months:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error loading available months:', error);
+    }
+  }
+
+  // Load pricing scenarios for selected month
+  async loadPricingScenarios(month = null) {
+    if (!month && !this.state.pricing_scenarios_month) {
+      console.error('No month selected for pricing scenarios');
+      return;
+    }
+
+    const selectedMonth = month || this.state.pricing_scenarios_month;
+    this.state.pricing_scenarios_loading = true;
+    this.state.pricing_scenarios_error = null;
+
+    try {
+      const response = await fetch(`/api/pricing-scenarios?month=${selectedMonth}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        this.state.pricing_scenarios_data = data;
+        this.state.pricing_scenarios_month = selectedMonth;
+      } else {
+        this.state.pricing_scenarios_error = data.message || 'Failed to load pricing scenarios';
+        this.state.pricing_scenarios_data = null;
+      }
+    } catch (error) {
+      console.error('Error loading pricing scenarios:', error);
+      this.state.pricing_scenarios_error = 'Network error loading pricing scenarios';
+      this.state.pricing_scenarios_data = null;
+    } finally {
+      this.state.pricing_scenarios_loading = false;
+    }
+  }
+
+  // Calculate custom net scenario
+  async calculateCustomNetScenario() {
+    if (!this.state.pricing_scenarios_month) {
+      console.error('No month selected for custom scenario');
+      return;
+    }
+
+    this.state.pricing_scenarios_loading = true;
+    this.state.pricing_scenarios_error = null;
+
+    try {
+      const response = await fetch('/api/pricing-scenarios/custom', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          month: this.state.pricing_scenarios_month,
+          target: this.state.pricing_scenarios_custom_target
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Update the custom scenario in existing data
+        if (this.state.pricing_scenarios_data) {
+          this.state.pricing_scenarios_data.scenarios.net_custom = data.scenarios.net_custom;
+        }
+      } else {
+        this.state.pricing_scenarios_error = data.message || 'Failed to calculate custom scenario';
+      }
+    } catch (error) {
+      console.error('Error calculating custom scenario:', error);
+      this.state.pricing_scenarios_error = 'Network error calculating custom scenario';
+    } finally {
+      this.state.pricing_scenarios_loading = false;
+    }
+  }
+
+  // Handle month selection change
+  async onPricingScenariosMonthChange(month) {
+    this.state.pricing_scenarios_month = month;
+    await this.loadPricingScenarios(month);
+  }
+
+  // Handle tab change
+  onPricingScenariosTabChange(tab) {
+    this.state.pricing_scenarios_current_tab = tab;
+  }
+
+  // Handle weighting mode change
+  onPricingScenariosWeightingModeChange(mode) {
+    this.state.pricing_scenarios_weighting_mode = mode;
+  }
+
+  // Handle custom target change
+  onPricingScenariosCustomTargetChange(target) {
+    this.state.pricing_scenarios_custom_target = parseFloat(target) || 0;
+  }
+
+  // Format currency for pricing scenarios
+  formatPricingCurrency(amount) {
+    return new Intl.NumberFormat('en-AE', {
+      style: 'currency',
+      currency: 'AED',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amount);
+  }
+
+  // Format percentage for pricing scenarios
+  formatPricingPercentage(value) {
+    return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
+  }
+
+  // Get current scenario data based on tab and weighting mode
+  getCurrentScenarioData() {
+    if (!this.state.pricing_scenarios_data || !this.state.pricing_scenarios_data.scenarios) {
+      return null;
+    }
+
+    const scenarios = this.state.pricing_scenarios_data.scenarios;
+
+    switch (this.state.pricing_scenarios_current_tab) {
+      case 'break_even':
+        return scenarios.break_even || [];
+
+      case 'net_10k':
+        if (this.state.pricing_scenarios_weighting_mode === 'uniform') {
+          return scenarios.net_10k?.uniform?.rows || [];
+        } else {
+          return scenarios.net_10k?.weighted?.rows || [];
+        }
+
+      case 'net_custom':
+        if (this.state.pricing_scenarios_weighting_mode === 'uniform') {
+          return scenarios.net_custom?.uniform?.rows || [];
+        } else {
+          return scenarios.net_custom?.weighted?.rows || [];
+        }
+
+      default:
+        return [];
+    }
+  }
+
+  // Get scenario metadata (uplifts, warnings, etc.)
+  getCurrentScenarioMetadata() {
+    if (!this.state.pricing_scenarios_data || !this.state.pricing_scenarios_data.scenarios) {
+      return null;
+    }
+
+    const scenarios = this.state.pricing_scenarios_data.scenarios;
+
+    switch (this.state.pricing_scenarios_current_tab) {
+      case 'net_10k':
+        if (this.state.pricing_scenarios_weighting_mode === 'uniform') {
+          return {
+            x: scenarios.net_10k?.uniform?.x,
+            unrealistic: scenarios.net_10k?.uniform?.unrealistic
+          };
+        } else {
+          return {
+            x_budget: scenarios.net_10k?.weighted?.x_budget,
+            x_range: scenarios.net_10k?.weighted?.x_range,
+            unrealistic: scenarios.net_10k?.weighted?.unrealistic
+          };
+        }
+
+      case 'net_custom':
+        if (this.state.pricing_scenarios_weighting_mode === 'uniform') {
+          return {
+            x: scenarios.net_custom?.uniform?.x,
+            unrealistic: scenarios.net_custom?.uniform?.unrealistic
+          };
+        } else {
+          return {
+            x_budget: scenarios.net_custom?.weighted?.x_budget,
+            x_range: scenarios.net_custom?.weighted?.x_range,
+            unrealistic: scenarios.net_custom?.weighted?.unrealistic
+          };
+        }
+
+      default:
+        return null;
+    }
+  }
+
+  // Action button methods
+  async applyPricingChanges() {
+    const currentTab = this.state.pricing_scenarios_current_tab;
+    const mode = this.state.pricing_scenarios_weighting_mode;
+    const month = this.state.pricing_scenarios_month;
+
+    if (!month) {
+      this.state.pricing_scenarios_error = 'Please select a month first.';
+      return;
+    }
+
+    try {
+      this.state.pricing_scenarios_loading = true;
+      this.state.pricing_scenarios_error = null;
+
+      // Generate idempotency key
+      const idempotencyKey = this.generateIdempotencyKey();
+
+      const payload = {
+        month: month,
+        scenario: currentTab,
+        mode: mode,
+        dry_run: false, // Create actual price list
+        idempotency_key: idempotencyKey
+      };
+
+      // Add target for custom scenarios
+      if (currentTab === 'net_custom') {
+        const target = parseFloat(this.state.pricing_scenarios_custom_target);
+        if (!target || target <= 0) {
+          this.state.pricing_scenarios_error = 'Please enter a valid custom target amount.';
+          return;
+        }
+        payload.target = target;
+      }
+
+      const response = await fetch('/api/pricing-scenarios/apply', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json();
+
+      if (result.status === 'draft') {
+        // Show success message and offer to activate
+        this.showPriceListCreated(result);
+      } else if (result.status === 'error') {
+        this.state.pricing_scenarios_error = result.message;
+      } else {
+        this.state.pricing_scenarios_error = 'Unexpected response from server.';
+      }
+
+    } catch (error) {
+      console.error('Error applying pricing changes:', error);
+      this.state.pricing_scenarios_error = 'Failed to apply pricing changes. Please try again.';
+    } finally {
+      this.state.pricing_scenarios_loading = false;
+    }
+  }
+
+  async previewPricingChanges() {
+    const currentTab = this.state.pricing_scenarios_current_tab;
+    const mode = this.state.pricing_scenarios_weighting_mode;
+    const month = this.state.pricing_scenarios_month;
+
+    if (!month) {
+      this.state.pricing_scenarios_error = 'Please select a month first.';
+      return;
+    }
+
+    try {
+      this.state.pricing_scenarios_loading = true;
+      this.state.pricing_scenarios_error = null;
+
+      const payload = {
+        month: month,
+        scenario: currentTab,
+        mode: mode,
+        dry_run: true // Preview only
+      };
+
+      // Add target for custom scenarios
+      if (currentTab === 'net_custom') {
+        const target = parseFloat(this.state.pricing_scenarios_custom_target);
+        if (!target || target <= 0) {
+          this.state.pricing_scenarios_error = 'Please enter a valid custom target amount.';
+          return;
+        }
+        payload.target = target;
+      }
+
+      const response = await fetch('/api/pricing-scenarios/apply', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json();
+
+      if (result.status === 'preview') {
+        this.showPricingPreview(result);
+      } else if (result.status === 'error') {
+        this.state.pricing_scenarios_error = result.message;
+      } else {
+        this.state.pricing_scenarios_error = 'Unexpected response from server.';
+      }
+
+    } catch (error) {
+      console.error('Error previewing pricing changes:', error);
+      this.state.pricing_scenarios_error = 'Failed to preview pricing changes. Please try again.';
+    } finally {
+      this.state.pricing_scenarios_loading = false;
+    }
+  }
+
+  generateIdempotencyKey() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      const r = Math.random() * 16 | 0;
+      const v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+  showPriceListCreated(result) {
+    // Show notification or modal with price list details
+    const message = `Price list created successfully!\n\n` +
+      `Products: ${result.summary.products}\n` +
+      `Min Change: ${(result.summary.min_pct * 100).toFixed(2)}%\n` +
+      `Max Change: ${(result.summary.max_pct * 100).toFixed(2)}%\n` +
+      `Floors Applied: ${result.summary.floors_triggered}`;
+
+    // You can implement a proper notification system here
+    alert(message);
+  }
+
+  showPricingPreview(result) {
+    // Show preview modal or notification
+    const message = `Pricing Preview:\n\n` +
+      `Products: ${result.summary.products}\n` +
+      `Min Change: ${(result.summary.min_pct * 100).toFixed(2)}%\n` +
+      `Max Change: ${(result.summary.max_pct * 100).toFixed(2)}%\n` +
+      `Floors Applied: ${result.summary.floors_triggered}`;
+
+    // You can implement a proper preview modal here
+    alert(message);
   }
 }
 PosDashboard.template = 'PosDashboard'
