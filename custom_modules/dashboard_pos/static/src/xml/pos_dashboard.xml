@@ -230,7 +230,7 @@
                                             <td class="text-right">
                                                 <t t-esc="line.credit"/>
                                             </td>
-                                            <td class="text-right" t-att-class="line.balance < 0 ? 'text-danger' : 'text-success'">
+                                            <td class="text-right" t-att-class="line.balance &lt; 0 ? 'text-danger' : 'text-success'">
                                                 <t t-esc="line.balance"/>
                                             </td>
                                         </tr>
@@ -328,7 +328,7 @@
                                             <td class="text-right">
                                                 <t t-esc="line.credit"/>
                                             </td>
-                                            <td class="text-right" t-att-class="line.balance < 0 ? 'text-danger' : 'text-success'">
+                                            <td class="text-right" t-att-class="line.balance &lt; 0 ? 'text-danger' : 'text-success'">
                                                 <t t-esc="line.balance"/>
                                             </td>
                                         </tr>
