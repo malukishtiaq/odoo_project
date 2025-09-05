@@ -79,6 +79,10 @@ export class PosDashboard extends Component {
       await this.render_product_category_graph();
       await this.onclick_pos_sales('Weekly');
 
+      // Generate default reports
+      await this.generatePosReport();
+      await this.generateAccountingReport();
+
       // Add entrance animations
       this.addEntranceAnimations();
     });
@@ -387,7 +391,12 @@ export class PosDashboard extends Component {
     //  Modern Sale bar chart with advanced styling
     var option = $(events.target).val();
     var self = this
-    var ctx = document.getElementById("canvas_1").getContext("2d");
+    var canvas = document.getElementById("canvas_1");
+    if (!canvas) {
+      console.error("Canvas element not found");
+      return;
+    }
+    var ctx = canvas.getContext("2d");
     this.orm.call('pos.order', 'get_department', [option])
       .then(function (arrays) {
         var data = {
@@ -816,14 +825,17 @@ export class PosDashboard extends Component {
   // Fetch Profit & Loss Report
   async fetchProfitLossReport() {
     try {
+      console.log('Fetching Profit & Loss report...');
       // Get accounts of income and expense types
       const accountDomain = [
         ['account_type', 'in', ['income', 'income_other', 'expense', 'expense_depreciation', 'expense_direct_cost']]
       ];
-
+      
       const accounts = await this.orm.searchRead('account.account', accountDomain, [
         'id', 'name', 'code', 'account_type'
       ]);
+      
+      console.log('Found accounts:', accounts.length);
 
       // Get move lines for these accounts in the date range
       const moveLineDomain = [
@@ -879,7 +891,8 @@ export class PosDashboard extends Component {
         level: 1,
         type: 'income_expense'
       }));
-
+      
+      console.log('Profit & Loss data:', this.state.profit_loss_data);
       this.state.current_report_data = this.state.profit_loss_data;
 
     } catch (error) {
