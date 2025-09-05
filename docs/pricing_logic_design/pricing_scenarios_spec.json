@@ -1,0 +1,266 @@
+{
+  "meta": {
+    "title": "GreenLines ERP \u2014 POS Dashboard: Pricing Scenarios (Previous Months)",
+    "version": "1.0.0",
+    "owner": "Product: Green Lines (Maluk Ishtiaq)",
+    "last_updated": "2025-09-05",
+    "audience": [
+      "Cursor",
+      "Backend Devs",
+      "Frontend Devs",
+      "QA"
+    ],
+    "summary": "Compute and display per-product prices for Break-Even, +10,000 AED Net, and +Custom Net targets using uniform and weighted uplifts; enforce cost floors; detect unrealistic targets; show results for previous months only."
+  },
+  "scope": {
+    "months_source": "Historical months only; no current/ongoing month computations.",
+    "product_identifier": "Product Name (no SKU available)",
+    "vat_note": "Use pre-VAT prices/costs. If input prices are VAT-inclusive, convert using net = gross / 1.05 (UAE VAT 5%)."
+  },
+  "data_contract": {
+    "required_fields_per_product_month": [
+      "product_name:string",
+      "qty:number (net of returns; can be negative or zero)",
+      "price:number (effective pre-VAT unit price after discounts)",
+      "cost:number (COGS per unit, pre-VAT, moving average or FIFO)"
+    ],
+    "required_global_fields_per_month": [
+      "expenses_E:number (OPEX; exclude COGS & VAT)",
+      "currency:string (AED expected; convert upstream if not)"
+    ],
+    "derived_fields": {
+      "revenue_product": "qty * price",
+      "R_total": "sum(revenue_product)",
+      "G_total": "sum(qty * (price - cost))",
+      "N_total": "G_total - expenses_E"
+    }
+  },
+  "business_logic": {
+    "guards": {
+      "cost_floor_per_item": "Target price_i >= cost_i (=> uplift >= cost_i/price_i - 1)",
+      "zero_revenue": "If R_total == 0 => mark month as InsufficientSales and skip targets.",
+      "rounding": "Display prices to 2 decimals; keep internal calc precision double.",
+      "min_margin_warning": "Flag if (target_price_i - cost_i)/target_price_i < 0.02"
+    },
+    "weights": {
+      "def": "w_i = revenue_product_i / R_total (if R_total>0; else 0)",
+      "note": "Used for break-even allocation and weighted uplift."
+    },
+    "scenarios": {
+      "break_even": {
+        "goal": "Net Profit = 0 for the selected month using past quantities.",
+        "allocation": "E_i = w_i * expenses_E",
+        "formula_per_item": "price_be_i = cost_i + (E_i / qty_i) = cost_i + (expenses_E * price_i / R_total)",
+        "validation": "Sum(qty_i * (price_be_i - cost_i)) ~= expenses_E (within rounding tolerance)."
+      },
+      "net_fixed_10k": {
+        "goal": "Net Profit = +10,000 AED",
+        "uniform": {
+          "uplift": "x = (N_target - N_total) / R_total",
+          "apply_cost_floor": "x = max(x, x_min), where x_min = max_i(cost_i/price_i - 1) over items with price_i>0",
+          "target_price": "price_target_i = price_i * (1 + x)"
+        },
+        "weighted": {
+          "uplift_budget": "Same total uplift budget x from uniform (after floor) to preserve target at monthly total level.",
+          "initial_per_item_uplift": "x_i0 = x * (w_i / S2), where S2 = sum(w_i^2) over valid items",
+          "floors": "x_i = max(x_i0, cost_i/price_i - 1). If any x_i increased, re-normalize remaining budget across items with headroom proportionally to w_i until \u03a3(revenue_i * x_i) = x * R_total within tolerance.",
+          "target_price": "price_target_i = price_i * (1 + x_i)"
+        }
+      },
+      "net_custom": {
+        "goal": "Net Profit = +UserInput AED",
+        "same_as_fixed": "Repeat net_fixed_10k flow with N_target = user_input."
+      },
+      "unrealistic_detection": {
+        "rules": [
+          "x_raw = (N_target - N_total)/R_total > 0.30 (30% average uplift)",
+          "Even with hard cap X_HARD = 0.50 (50% uplift), projected net < N_target",
+          "Over 10% of items require > 2x price to hit target",
+          "R_total <= 0 (low/no sales)"
+        ],
+        "advice": [
+          "Open more branches / expand coverage.",
+          "Increase marketing spend to drive acquisition.",
+          "Run promotions to grow traffic; improve repeat purchase.",
+          "Optimize product mix toward higher-margin items.",
+          "Increase average basket size via bundles / cross-sell.",
+          "Review and reduce overhead expenses."
+        ]
+      }
+    }
+  },
+  "ui_contract": {
+    "entry_point": "POS Dashboard \u2192 Pricing Scenarios (Previous Months) card/section",
+    "controls": {
+      "month_picker": "Only past months selectable",
+      "target_tabs": [
+        "Break Even",
+        "+10,000 AED Net",
+        "+Custom Net"
+      ],
+      "toggle_weighting": "Uniform / Weighted (for +10k and Custom)",
+      "custom_input": "Number input (AED), positive integer recommended"
+    },
+    "summary_card": [
+      "Revenue (R_total)",
+      "Gross Profit (G_total)",
+      "Expenses (E)",
+      "Net Profit (N_total)",
+      "Cost-floor uplift x_min"
+    ],
+    "tables": {
+      "columns_break_even": [
+        "Product",
+        "Qty",
+        "Cost",
+        "Real Price",
+        "Break-even Price",
+        "Diff",
+        "Diff %"
+      ],
+      "columns_target": [
+        "Product",
+        "Qty",
+        "Cost",
+        "Real Price",
+        "Target Price",
+        "% Change",
+        "Margin After"
+      ],
+      "row_flags": [
+        "Below Cost (current)",
+        "Near-Cost After Target (<2% margin)"
+      ]
+    },
+    "banners": {
+      "uniform": "Required uniform uplift: {x_pct}",
+      "weighted": "Weighted uplift (range): {min_pct}\u2013{max_pct}",
+      "unrealistic": "Target is unrealistic on last month\u2019s volumes. Consider growth actions."
+    },
+    "actions": [
+      "Apply Uniform +x%",
+      "Apply Weighted changes (+a% \u2026 +b%)"
+    ],
+    "copy_blocks": {
+      "insufficient_sales": "Insufficient sales last month to compute target.",
+      "unrealistic_detail": "Even at +50% we miss target by {gap_aed}. Consider expanding branches, increasing marketing spend, or customer acquisition."
+    }
+  },
+  "api_contract": {
+    "request": {
+      "GET /api/pricing-scenarios?month=YYYY-MM": "Returns the computed scenarios for the month.",
+      "body_note": "No request body; month identifies the period. Expenses E must be pre-computed upstream."
+    },
+    "response_schema": {
+      "month": "YYYY-MM",
+      "totals": {
+        "R": "number",
+        "G": "number",
+        "E": "number",
+        "N": "number",
+        "x_min": "number"
+      },
+      "scenarios": {
+        "break_even": [
+          {
+            "product": "string",
+            "qty": "number",
+            "cost": "number",
+            "price_real": "number",
+            "price_target": "number",
+            "diff": "number",
+            "diff_pct": "number"
+          }
+        ],
+        "net_10k": {
+          "uniform": {
+            "x": "number",
+            "rows": [
+              {
+                "product": "string",
+                "qty": "number",
+                "cost": "number",
+                "price_real": "number",
+                "price_target": "number",
+                "pct": "number",
+                "margin_after": "number"
+              }
+            ]
+          },
+          "weighted": {
+            "x_budget": "number",
+            "x_range": [
+              "number",
+              "number"
+            ],
+            "rows": [
+              {
+                "product": "string",
+                "qty": "number",
+                "cost": "number",
+                "price_real": "number",
+                "price_target": "number",
+                "pct": "number",
+                "margin_after": "number"
+              }
+            ]
+          }
+        },
+        "net_custom": {
+          "target": "number",
+          "status": "ok|unrealistic|insufficient",
+          "message": "string",
+          "uniform": "same shape as net_10k.uniform",
+          "weighted": "same shape as net_10k.weighted"
+        }
+      }
+    },
+    "error_handling": {
+      "400": "Invalid month or data missing",
+      "422": "InsufficientSales",
+      "500": "InternalError"
+    }
+  },
+  "pseudocode": {
+    "aggregate": "\ninputs: rows per product_name for selected month [qty, price, cost], expenses_E\nfor each row: revenue_i = qty * price\nR = sum(revenue_i); G = sum(qty * (price - cost)); N = G - E\nx_min = max over rows of (cost/price - 1) where price>0\n",
+    "break_even": "\nif R <= 0: status = InsufficientSales\nfor each item:\n  w = revenue_i / R\n  price_be = cost + (E * price / R)\n  diff = price - price_be\n  diff_pct = (price/price_be - 1) if price_be>0 else null\n",
+    "uniform_uplift": "\nx_raw = (N_target - N)/R\nx = max(x_raw, x_min)\nfor each item: price_target = price * (1 + x)\n",
+    "weighted_uplift": "\ncompute w_i = revenue_i / R, S2 = sum(w_i^2)\nx_budget = max((N_target - N)/R, x_min)\ninit x_i = x_budget * (w_i / S2)\nenforce floors: x_i = max(x_i, cost/price - 1)\niterate redistribute remaining uplift proportionally by w_i among items with headroom\nuntil sum(revenue_i * x_i) \u2248 x_budget * R (tolerance 1e-6 or 0.01 AED on totals)\nprice_target_i = price * (1 + x_i)\n",
+    "unrealistic": "\nx_raw = (N_target - N)/R\ncap = 0.50\nsimulate with x_cap = max(min(x_raw, cap), x_min)\ncompute projected Net_cap; if Net_cap < N_target => unrealistic\nif x_raw > 0.30 => unrealistic\nif >10% items need >2x price => unrealistic\nif R <= 0 => insufficient\n"
+  },
+  "qa_acceptance": {
+    "unit_tests": [
+      "Break-even sum of qty*(price_be - cost) equals E within \u00b10.01 AED",
+      "Uniform uplift reaches N_target within \u00b10.5 AED when no floors bind",
+      "Weighted uplift equals uniform total uplift budget within \u00b10.01 AED",
+      "Cost floors respected for all items",
+      "Unrealistic flags trigger on thresholds"
+    ],
+    "sample_data_min": [
+      {
+        "product_name": "A",
+        "qty": 50,
+        "price": 100,
+        "cost": 80
+      },
+      {
+        "product_name": "B",
+        "qty": 40,
+        "price": 80,
+        "cost": 60
+      },
+      {
+        "product_name": "C",
+        "qty": 30,
+        "price": 60,
+        "cost": 55
+      }
+    ],
+    "sample_E": 1800,
+    "sample_targets": [
+      0,
+      10000,
+      25000
+    ]
+  }
+}

@@ -172,6 +172,100 @@
                 </div>
             </div>
 
+            <!-- POS Order Report Section -->
+            <div class="pos-order-report-section slide-in-right">
+                <div class="pos-report-header">
+                    <h3 class="pos-report-title">POS Order Summary</h3>
+                    <div class="pos-report-controls">
+                        <div class="pos-date-selector">
+                            <label class="date-label">Report Period</label>
+                            <div class="date-inputs-inline">
+                                <input type="date" class="modern-date-input" id="pos_from_date" 
+                                       t-att-value="state.pos_from_date" t-on-change="onPosDateChange"/>
+                                <span class="date-separator">to</span>
+                                <input type="date" class="modern-date-input" id="pos_to_date" 
+                                       t-att-value="state.pos_to_date" t-on-change="onPosDateChange"/>
+                            </div>
+                        </div>
+                        <button class="modern-btn generate-btn" t-on-click="generatePosReport">
+                            <i class="fa fa-chart-bar"></i> Generate Report
+                        </button>
+                    </div>
+                </div>
+
+                <!-- POS Report Display Area -->
+                <div class="pos-report-display-area">
+                    <!-- Total Sales Summary -->
+                    <div class="pos-summary-cards">
+                        <div class="pos-summary-card total-orders">
+                            <div class="summary-icon">
+                                <i class="fa fa-shopping-cart"></i>
+                            </div>
+                            <div class="summary-content">
+                                <div class="summary-label">Total Orders</div>
+                                <div class="summary-value"><t t-esc="state.pos_total_orders"/></div>
+                            </div>
+                        </div>
+                        <div class="pos-summary-card total-amount">
+                            <div class="summary-icon">
+                                <i class="fa fa-dollar-sign"></i>
+                            </div>
+                            <div class="summary-content">
+                                <div class="summary-label">Total Amount</div>
+                                <div class="summary-value"><t t-esc="state.pos_total_amount"/></div>
+                            </div>
+                        </div>
+                        <div class="pos-summary-card avg-order">
+                            <div class="summary-icon">
+                                <i class="fa fa-chart-line"></i>
+                            </div>
+                            <div class="summary-content">
+                                <div class="summary-label">Average Order</div>
+                                <div class="summary-value"><t t-esc="state.pos_avg_order"/></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Selling Products -->
+                    <div class="top-products-section">
+                        <h4 class="section-title">Top 3 Selling Products</h4>
+                        <div class="top-products-list">
+                            <t t-foreach="state.pos_top_products" t-as="product" t-key="product.id">
+                                <div class="product-item" t-att-class="'rank-' + product.rank">
+                                    <div class="product-rank">
+                                        <span class="rank-number"><t t-esc="product.rank"/></span>
+                                    </div>
+                                    <div class="product-info">
+                                        <div class="product-name"><t t-esc="product.name"/></div>
+                                        <div class="product-details">
+                                            <span class="quantity">Qty: <t t-esc="product.quantity"/></span>
+                                            <span class="amount">Amount: <t t-esc="product.amount"/></span>
+                                        </div>
+                                    </div>
+                                    <div class="product-chart">
+                                        <div class="mini-bar" t-att-style="'width: ' + product.percentage + '%'"></div>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div class="pos-report-loading" t-if="state.pos_report_loading">
+                        <div class="loading-spinner"></div>
+                        <p>Generating POS report...</p>
+                    </div>
+
+                    <!-- No Data State -->
+                    <div class="pos-report-no-data" t-if="!state.pos_report_loading and state.pos_total_orders === 0">
+                        <div class="no-data-icon">
+                            <i class="fa fa-shopping-cart"></i>
+                        </div>
+                        <p>No POS orders found for the selected period</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Accounting Reports Section -->
             <div class="accounting-reports-section slide-in-left">
                 <div class="reports-header">

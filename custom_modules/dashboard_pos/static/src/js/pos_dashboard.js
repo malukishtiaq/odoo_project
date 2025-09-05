@@ -55,6 +55,14 @@ export class PosDashboard extends Component {
       balance_sheet_liabilities: [],
       trial_balance_data: [],
       current_report_data: [],
+      // POS Order Report State
+      pos_from_date: this.get_today(),
+      pos_to_date: this.get_today(),
+      pos_report_loading: false,
+      pos_total_orders: 0,
+      pos_total_amount: '0.00',
+      pos_avg_order: '0.00',
+      pos_top_products: [],
     });
     // When the component is about to start, fetch data in tiles
     onWillStart(async () => {
@@ -1133,6 +1141,122 @@ export class PosDashboard extends Component {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(amount);
+  }
+
+  // ===== POS ORDER REPORT METHODS =====
+  
+  // Handle POS date change
+  async onPosDateChange() {
+    const fromDate = document.getElementById('pos_from_date').value;
+    const toDate = document.getElementById('pos_to_date').value;
+    
+    if (fromDate && toDate) {
+      this.state.pos_from_date = fromDate;
+      this.state.pos_to_date = toDate;
+    }
+  }
+
+  // Generate POS Order Report
+  async generatePosReport() {
+    this.state.pos_report_loading = true;
+    
+    try {
+      await this.fetchPosOrderData();
+      await this.fetchTopSellingProducts();
+    } catch (error) {
+      console.error('Error generating POS report:', error);
+    } finally {
+      this.state.pos_report_loading = false;
+    }
+  }
+
+  // Fetch POS Order Data
+  async fetchPosOrderData() {
+    try {
+      // Get POS orders for the date range
+      const domain = [
+        ['date_order', '>=', this.state.pos_from_date],
+        ['date_order', '<=', this.state.pos_to_date + ' 23:59:59'],
+        ['state', 'in', ['paid', 'done', 'invoiced']]
+      ];
+      
+      const orders = await this.orm.searchRead('pos.order', domain, [
+        'id', 'amount_total', 'date_order'
+      ]);
+      
+      // Calculate totals
+      const totalOrders = orders.length;
+      const totalAmount = orders.reduce((sum, order) => sum + (order.amount_total || 0), 0);
+      const avgOrder = totalOrders > 0 ? totalAmount / totalOrders : 0;
+      
+      // Update state
+      this.state.pos_total_orders = totalOrders;
+      this.state.pos_total_amount = this.formatCurrency(totalAmount);
+      this.state.pos_avg_order = this.formatCurrency(avgOrder);
+      
+    } catch (error) {
+      console.error('Error fetching POS order data:', error);
+      this.state.pos_total_orders = 0;
+      this.state.pos_total_amount = '0.00';
+      this.state.pos_avg_order = '0.00';
+    }
+  }
+
+  // Fetch Top Selling Products
+  async fetchTopSellingProducts() {
+    try {
+      // Get POS order lines for the date range
+      const domain = [
+        ['order_id.date_order', '>=', this.state.pos_from_date],
+        ['order_id.date_order', '<=', this.state.pos_to_date + ' 23:59:59'],
+        ['order_id.state', 'in', ['paid', 'done', 'invoiced']]
+      ];
+      
+      const orderLines = await this.orm.searchRead('pos.order.line', domain, [
+        'product_id', 'qty', 'price_subtotal'
+      ]);
+      
+      // Group by product and calculate totals
+      const productTotals = {};
+      orderLines.forEach(line => {
+        const productId = line.product_id[0];
+        const productName = line.product_id[1];
+        
+        if (!productTotals[productId]) {
+          productTotals[productId] = {
+            id: productId,
+            name: productName,
+            quantity: 0,
+            amount: 0
+          };
+        }
+        
+        productTotals[productId].quantity += line.qty || 0;
+        productTotals[productId].amount += line.price_subtotal || 0;
+      });
+      
+      // Convert to array and sort by quantity
+      const products = Object.values(productTotals)
+        .sort((a, b) => b.quantity - a.quantity)
+        .slice(0, 3); // Top 3 only
+      
+      // Calculate percentages for mini bars
+      const maxQuantity = products.length > 0 ? products[0].quantity : 1;
+      
+      // Format and add ranking
+      this.state.pos_top_products = products.map((product, index) => ({
+        id: product.id,
+        name: product.name,
+        quantity: product.quantity,
+        amount: this.formatCurrency(product.amount),
+        rank: index + 1,
+        percentage: maxQuantity > 0 ? (product.quantity / maxQuantity) * 100 : 0
+      }));
+      
+    } catch (error) {
+      console.error('Error fetching top selling products:', error);
+      this.state.pos_top_products = [];
+    }
   }
 }
 PosDashboard.template = 'PosDashboard'
