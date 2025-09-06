@@ -31,6 +31,8 @@
     'website': "https://www.cybrosys.com",
     'depends': ['hr', 'point_of_sale', 'web', 'account'],
     'data': [
+        'security/security.xml',
+        'security/ir.model.access.csv',
         'views/pos_order_views.xml'
     ],
     'assets': {

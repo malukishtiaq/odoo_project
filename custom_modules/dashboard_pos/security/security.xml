@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Pricing Administrator Group -->
+        <record id="group_pricing_admin" model="res.groups">
+            <field name="name">Pricing Administrator</field>
+            <field name="category_id" ref="base.module_category_human_resources"/>
+            <field name="comment">Can create, activate, and manage pricing scenarios and price lists.</field>
+        </record>
+    </data>
+</odoo>

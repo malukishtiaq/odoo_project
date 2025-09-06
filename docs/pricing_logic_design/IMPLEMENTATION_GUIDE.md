@@ -48,6 +48,10 @@ Compute and render **Break-Even**, **+10,000 AED Net**, and **+Custom Net** pric
 - Unrealistic target detection with actionable guidance.
 - Dashboard UI contract with consistent tables and banners.
 - JSON API contract for frontend consumption.
+- **Real OPEX integration from GL accounts with monthly materialization.**
+- **VAT conversion logic for gross-to-net price normalization.**
+- **Action buttons with price list creation and activation functionality.**
+- **Comprehensive unit and integration testing.**
 
 ---
 
@@ -57,11 +61,27 @@ Compute and render **Break-Even**, **+10,000 AED Net**, and **+Custom Net** pric
 - ✅ Weighted scenario total uplift equals uniform uplift budget (±0.01 AED).
 - ✅ No target price below cost.
 - ✅ Unrealistic messaging appears for extreme inputs.
+- ✅ **Real OPEX expenses from GL accounts (COGS/VAT excluded).**
+- ✅ **VAT conversion from gross to net prices (5% UAE rate).**
+- ✅ **Price list creation and activation with RBAC.**
+- ✅ **Idempotency key prevents duplicate price lists.**
+- ✅ **Comprehensive unit tests for all new functionality.**
 
 ---
 
 ## Notes for Cursor
-- Keep logic in a pure module so it’s testable.
+- Keep logic in a pure module so it's testable.
 - Write unit tests with the sample dataset in the JSON file.
 - Add a small iterative loop for weighted uplift re-normalization; cap iterations (e.g., 20) and break on convergence by uplift budget gap < 0.01 AED.
 - Respect VAT handling (use pre-VAT). If upstream sends gross, convert using 5% VAT.
+
+## New API Endpoints
+- `POST /api/pricing-scenarios/apply` - Apply pricing scenarios and create price lists
+- `POST /api/price-lists/{id}/activate` - Activate a price list (RBAC required)
+
+## New Models
+- `pricing.price.list` - Price list for pricing scenarios
+- `pricing.price.list.item` - Individual price list items
+
+## Security Groups
+- `dashboard_pos.group_pricing_admin` - Can create, activate, and manage pricing scenarios

@@ -66,8 +66,8 @@ export class PosDashboard extends Component {
       // Pricing Scenarios State
       pricing_scenarios_loading: false,
       pricing_scenarios_data: null,
-      pricing_scenarios_month: null,
-      pricing_scenarios_available_months: [],
+      pricing_scenarios_start_date: null,
+      pricing_scenarios_end_date: null,
       pricing_scenarios_current_tab: 'break_even',
       pricing_scenarios_weighting_mode: 'uniform', // 'uniform' or 'weighted'
       pricing_scenarios_custom_target: 25000,
@@ -92,8 +92,8 @@ export class PosDashboard extends Component {
       await this.generatePosReport();
       await this.generateAccountingReport();
 
-      // Load pricing scenarios data
-      await this.loadPricingScenariosAvailableMonths();
+      // Initialize pricing scenarios date range
+      this.initializePricingScenariosDateRange();
 
       // Add entrance animations
       this.addEntranceAnimations();
@@ -1286,45 +1286,40 @@ export class PosDashboard extends Component {
 
   // ===== PRICING SCENARIOS METHODS =====
 
-  // Load available months for pricing scenarios
-  async loadPricingScenariosAvailableMonths() {
-    try {
-      const response = await fetch('/api/pricing-scenarios/available-months', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+  // Initialize pricing scenarios date range with default values
+  initializePricingScenariosDateRange() {
+    const today = new Date();
+    const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
 
-      if (response.ok) {
-        const data = await response.json();
-        this.state.pricing_scenarios_available_months = data.available_months || [];
-
-        // Set default month to the most recent available month
-        if (this.state.pricing_scenarios_available_months.length > 0) {
-          this.state.pricing_scenarios_month = this.state.pricing_scenarios_available_months[0].month;
-        }
-      } else {
-        console.error('Failed to load available months:', response.statusText);
-      }
-    } catch (error) {
-      console.error('Error loading available months:', error);
-    }
+    // Set default date range to last month
+    this.state.pricing_scenarios_start_date = this.formatDateForInput(lastMonth);
+    this.state.pricing_scenarios_end_date = this.formatDateForInput(lastMonthEnd);
   }
 
-  // Load pricing scenarios for selected month
-  async loadPricingScenarios(month = null) {
-    if (!month && !this.state.pricing_scenarios_month) {
-      console.error('No month selected for pricing scenarios');
+  // Format date for HTML date input (YYYY-MM-DD)
+  formatDateForInput(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  // Load pricing scenarios for selected date range
+  async loadPricingScenarios(startDate = null, endDate = null) {
+    const selectedStartDate = startDate || this.state.pricing_scenarios_start_date;
+    const selectedEndDate = endDate || this.state.pricing_scenarios_end_date;
+
+    if (!selectedStartDate || !selectedEndDate) {
+      console.error('No date range selected for pricing scenarios');
       return;
     }
 
-    const selectedMonth = month || this.state.pricing_scenarios_month;
     this.state.pricing_scenarios_loading = true;
     this.state.pricing_scenarios_error = null;
 
     try {
-      const response = await fetch(`/api/pricing-scenarios?month=${selectedMonth}`, {
+      const response = await fetch(`/api/pricing-scenarios/date-range?start_date=${selectedStartDate}&end_date=${selectedEndDate}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -1335,7 +1330,8 @@ export class PosDashboard extends Component {
 
       if (response.ok) {
         this.state.pricing_scenarios_data = data;
-        this.state.pricing_scenarios_month = selectedMonth;
+        this.state.pricing_scenarios_start_date = selectedStartDate;
+        this.state.pricing_scenarios_end_date = selectedEndDate;
       } else {
         this.state.pricing_scenarios_error = data.message || 'Failed to load pricing scenarios';
         this.state.pricing_scenarios_data = null;
@@ -1351,8 +1347,8 @@ export class PosDashboard extends Component {
 
   // Calculate custom net scenario
   async calculateCustomNetScenario() {
-    if (!this.state.pricing_scenarios_month) {
-      console.error('No month selected for custom scenario');
+    if (!this.state.pricing_scenarios_start_date || !this.state.pricing_scenarios_end_date) {
+      console.error('No date range selected for custom scenario');
       return;
     }
 
@@ -1366,7 +1362,8 @@ export class PosDashboard extends Component {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          month: this.state.pricing_scenarios_month,
+          start_date: this.state.pricing_scenarios_start_date,
+          end_date: this.state.pricing_scenarios_end_date,
           target: this.state.pricing_scenarios_custom_target
         }),
       });
@@ -1389,10 +1386,33 @@ export class PosDashboard extends Component {
     }
   }
 
-  // Handle month selection change
-  async onPricingScenariosMonthChange(month) {
-    this.state.pricing_scenarios_month = month;
-    await this.loadPricingScenarios(month);
+  // Handle start date change
+  onPricingScenariosStartDateChange(event) {
+    this.state.pricing_scenarios_start_date = event.target.value;
+  }
+
+  // Handle end date change
+  onPricingScenariosEndDateChange(event) {
+    this.state.pricing_scenarios_end_date = event.target.value;
+  }
+
+  // Handle date range apply
+  async onPricingScenariosDateRangeChange() {
+    if (!this.state.pricing_scenarios_start_date || !this.state.pricing_scenarios_end_date) {
+      this.showToast('Please select both start and end dates.', 'error');
+      return;
+    }
+
+    // Validate date range
+    const startDate = new Date(this.state.pricing_scenarios_start_date);
+    const endDate = new Date(this.state.pricing_scenarios_end_date);
+
+    if (startDate > endDate) {
+      this.showToast('Start date cannot be after end date.', 'error');
+      return;
+    }
+
+    await this.loadPricingScenarios();
   }
 
   // Handle tab change
@@ -1428,7 +1448,7 @@ export class PosDashboard extends Component {
   // Get current scenario data based on tab and weighting mode
   getCurrentScenarioData() {
     if (!this.state.pricing_scenarios_data || !this.state.pricing_scenarios_data.scenarios) {
-      return null;
+      return [];
     }
 
     const scenarios = this.state.pricing_scenarios_data.scenarios;
@@ -1502,10 +1522,11 @@ export class PosDashboard extends Component {
   async applyPricingChanges() {
     const currentTab = this.state.pricing_scenarios_current_tab;
     const mode = this.state.pricing_scenarios_weighting_mode;
-    const month = this.state.pricing_scenarios_month;
+    const startDate = this.state.pricing_scenarios_start_date;
+    const endDate = this.state.pricing_scenarios_end_date;
 
-    if (!month) {
-      this.state.pricing_scenarios_error = 'Please select a month first.';
+    if (!startDate || !endDate) {
+      this.state.pricing_scenarios_error = 'Please select a date range first.';
       return;
     }
 
@@ -1517,7 +1538,8 @@ export class PosDashboard extends Component {
       const idempotencyKey = this.generateIdempotencyKey();
 
       const payload = {
-        month: month,
+        start_date: startDate,
+        end_date: endDate,
         scenario: currentTab,
         mode: mode,
         dry_run: false, // Create actual price list
@@ -1564,10 +1586,11 @@ export class PosDashboard extends Component {
   async previewPricingChanges() {
     const currentTab = this.state.pricing_scenarios_current_tab;
     const mode = this.state.pricing_scenarios_weighting_mode;
-    const month = this.state.pricing_scenarios_month;
+    const startDate = this.state.pricing_scenarios_start_date;
+    const endDate = this.state.pricing_scenarios_end_date;
 
-    if (!month) {
-      this.state.pricing_scenarios_error = 'Please select a month first.';
+    if (!startDate || !endDate) {
+      this.state.pricing_scenarios_error = 'Please select a date range first.';
       return;
     }
 
@@ -1576,7 +1599,8 @@ export class PosDashboard extends Component {
       this.state.pricing_scenarios_error = null;
 
       const payload = {
-        month: month,
+        start_date: startDate,
+        end_date: endDate,
         scenario: currentTab,
         mode: mode,
         dry_run: true // Preview only
@@ -1648,6 +1672,335 @@ export class PosDashboard extends Component {
 
     // You can implement a proper preview modal here
     alert(message);
+  }
+
+  // Show toast notification
+  showToast(message, type = 'info') {
+    // Simple toast implementation - you can enhance this with a proper toast library
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    toast.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: ${type === 'error' ? '#f44336' : type === 'success' ? '#4caf50' : '#2196f3'};
+      color: white;
+      padding: 12px 20px;
+      border-radius: 4px;
+      z-index: 10000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      font-size: 14px;
+      max-width: 300px;
+    `;
+
+    document.body.appendChild(toast);
+
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+      }
+    }, 5000);
+  }
+
+  // ===== NEW COMPREHENSIVE DATA METHODS =====
+
+  // Get complete monthly sales data
+  async getCompleteMonthlySalesData(monthStart, monthEnd) {
+    try {
+      const result = await this.orm.call('pos.order', 'get_complete_monthly_sales_data', [monthStart, monthEnd]);
+      return result;
+    } catch (error) {
+      console.error('Error getting complete monthly sales data:', error);
+      this.showToast('Error loading sales data', 'error');
+      return null;
+    }
+  }
+
+  // Get product performance analysis
+  async getProductPerformanceAnalysis(monthStart, monthEnd) {
+    try {
+      const result = await this.orm.call('pos.order', 'get_product_performance_analysis', [monthStart, monthEnd]);
+      return result;
+    } catch (error) {
+      console.error('Error getting product performance analysis:', error);
+      this.showToast('Error loading performance analysis', 'error');
+      return null;
+    }
+  }
+
+  // Get category analysis
+  async getCategoryAnalysis(monthStart, monthEnd) {
+    try {
+      const result = await this.orm.call('pos.order', 'get_category_analysis', [monthStart, monthEnd]);
+      return result;
+    } catch (error) {
+      console.error('Error getting category analysis:', error);
+      this.showToast('Error loading category analysis', 'error');
+      return null;
+    }
+  }
+
+  // Export monthly sales data
+  async exportMonthlySalesData(monthStart, monthEnd, format = 'csv') {
+    try {
+      const result = await this.orm.call('pos.order', 'export_monthly_sales_data', [monthStart, monthEnd, format]);
+
+      if (result) {
+        // Create download link
+        const blob = new Blob([result], {
+          type: format === 'csv' ? 'text/csv' :
+            format === 'excel' ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' :
+              'application/json'
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `monthly_sales_${monthStart}_to_${monthEnd}.${format === 'excel' ? 'xlsx' : format}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+
+        this.showToast(`Data exported successfully as ${format.toUpperCase()}`, 'success');
+      }
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      this.showToast('Error exporting data', 'error');
+    }
+  }
+
+  // Display comprehensive product data in a modal
+  async showCompleteProductData(monthStart, monthEnd) {
+    try {
+      const data = await this.getCompleteMonthlySalesData(monthStart, monthEnd);
+
+      if (!data) return;
+
+      // Create modal content
+      const modalContent = this.createProductDataModal(data);
+
+      // Show modal (you can implement your own modal system)
+      this.showModal('Complete Product Sales Data', modalContent);
+
+    } catch (error) {
+      console.error('Error showing complete product data:', error);
+      this.showToast('Error loading product data', 'error');
+    }
+  }
+
+  // Create modal content for product data
+  createProductDataModal(data) {
+    const { products, total_products, total_revenue, total_quantity } = data;
+
+    let html = `
+      <div class="product-data-modal">
+        <div class="summary-stats">
+          <div class="stat-card">
+            <h4>Total Products</h4>
+            <span class="stat-value">${total_products}</span>
+          </div>
+          <div class="stat-card">
+            <h4>Total Revenue</h4>
+            <span class="stat-value">${this.formatCurrency(total_revenue)}</span>
+          </div>
+          <div class="stat-card">
+            <h4>Total Quantity</h4>
+            <span class="stat-value">${total_quantity}</span>
+          </div>
+        </div>
+        
+        <div class="export-buttons">
+          <button class="btn btn-primary" onclick="this.exportMonthlySalesData('${data.month_start}', '${data.month_end}', 'csv')">
+            Export CSV
+          </button>
+          <button class="btn btn-success" onclick="this.exportMonthlySalesData('${data.month_start}', '${data.month_end}', 'excel')">
+            Export Excel
+          </button>
+          <button class="btn btn-info" onclick="this.exportMonthlySalesData('${data.month_start}', '${data.month_end}', 'json')">
+            Export JSON
+          </button>
+        </div>
+        
+        <div class="product-table-container">
+          <table class="modern-table">
+            <thead>
+              <tr>
+                <th>Product Name</th>
+                <th>SKU</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Avg Price</th>
+                <th>Revenue</th>
+                <th>Margin %</th>
+                <th>Stock</th>
+                <th>Turnover</th>
+              </tr>
+            </thead>
+            <tbody>
+    `;
+
+    products.forEach(product => {
+      html += `
+        <tr>
+          <td>${product.product_name}</td>
+          <td>${product.sku || '-'}</td>
+          <td>${product.category_name}</td>
+          <td>${product.total_quantity}</td>
+          <td>${this.formatCurrency(product.avg_price)}</td>
+          <td>${this.formatCurrency(product.total_revenue)}</td>
+          <td class="${product.margin_percentage >= 20 ? 'text-success' : product.margin_percentage >= 10 ? 'text-warning' : 'text-danger'}">
+            ${product.margin_percentage.toFixed(1)}%
+          </td>
+          <td>${product.current_stock}</td>
+          <td>${product.turnover_ratio.toFixed(2)}</td>
+        </tr>
+      `;
+    });
+
+    html += `
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+
+    return html;
+  }
+
+  // Simple modal implementation
+  showModal(title, content) {
+    // Remove existing modal if any
+    const existingModal = document.querySelector('.custom-modal');
+    if (existingModal) {
+      existingModal.remove();
+    }
+
+    const modal = document.createElement('div');
+    modal.className = 'custom-modal';
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    `;
+
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = `
+      background: white;
+      border-radius: 8px;
+      max-width: 90%;
+      max-height: 90%;
+      overflow: auto;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    `;
+
+    modalContent.innerHTML = `
+      <div class="modal-header" style="padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin: 0;">${title}</h3>
+        <button class="close-modal" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 20px;">
+        ${content}
+      </div>
+    `;
+
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+
+    // Close modal handlers
+    const closeModal = () => modal.remove();
+    modalContent.querySelector('.close-modal').onclick = closeModal;
+    modal.onclick = (e) => {
+      if (e.target === modal) closeModal();
+    };
+
+    // Add some basic styling
+    const style = document.createElement('style');
+    style.textContent = `
+      .product-data-modal .summary-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+      .product-data-modal .stat-card {
+        background: #f8f9fa;
+        padding: 16px;
+        border-radius: 8px;
+        text-align: center;
+      }
+      .product-data-modal .stat-card h4 {
+        margin: 0 0 8px 0;
+        color: #666;
+        font-size: 14px;
+      }
+      .product-data-modal .stat-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #2c3e50;
+      }
+      .product-data-modal .export-buttons {
+        margin-bottom: 20px;
+        text-align: center;
+      }
+      .product-data-modal .export-buttons .btn {
+        margin: 0 8px;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .product-data-modal .export-buttons .btn-primary {
+        background: #007bff;
+        color: white;
+      }
+      .product-data-modal .export-buttons .btn-success {
+        background: #28a745;
+        color: white;
+      }
+      .product-data-modal .export-buttons .btn-info {
+        background: #17a2b8;
+        color: white;
+      }
+      .product-data-modal .product-table-container {
+        max-height: 400px;
+        overflow-y: auto;
+      }
+      .product-data-modal .modern-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .product-data-modal .modern-table th,
+      .product-data-modal .modern-table td {
+        padding: 8px 12px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+      }
+      .product-data-modal .modern-table th {
+        background: #f8f9fa;
+        font-weight: 600;
+      }
+      .product-data-modal .text-success {
+        color: #28a745;
+      }
+      .product-data-modal .text-warning {
+        color: #ffc107;
+      }
+      .product-data-modal .text-danger {
+        color: #dc3545;
+      }
+    `;
+    document.head.appendChild(style);
   }
 }
 PosDashboard.template = 'PosDashboard'

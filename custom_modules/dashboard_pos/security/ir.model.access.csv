@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_pricing_price_list_user,pricing.price.list.user,model_pricing_price_list,base.group_user,1,0,0,0
+access_pricing_price_list_admin,pricing.price.list.admin,model_pricing_price_list,dashboard_pos.group_pricing_admin,1,1,1,1
+access_pricing_price_list_item_user,pricing.price.list.item.user,model_pricing_price_list_item,base.group_user,1,0,0,0
+access_pricing_price_list_item_admin,pricing.price.list.item.admin,model_pricing_price_list_item,dashboard_pos.group_pricing_admin,1,1,1,1

@@ -464,6 +464,12 @@
                         <input type="date" class="modern-date-input" id="to_date_cus" 
                                t-att-value="state.to_date" t-on-change="onDateChange"/>
                     </div>
+                    <div class="date-input-group">
+                        <button class="modern-btn comprehensive-data-btn" 
+                                t-on-click="() => this.showCompleteProductData(state.from_date, state.to_date)">
+                            <i class="fa fa-table"></i> View All Products
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -667,6 +673,241 @@
                                     </table>
                                 </div>
                             </div>
+
+            <!-- Pricing Scenarios Section -->
+            <div class="pricing-scenarios-section slide-in-right" style="margin-top: 24px;">
+                <div class="modern-table-card">
+                    <div class="table-header">
+                        <i class="fa fa-calculator" style="margin-right: 8px;"></i>
+                        Pricing Scenarios (Previous Months)
+                    </div>
+                    
+                    <!-- Controls Section -->
+                    <div class="pricing-controls" style="padding: 16px; border-bottom: 1px solid #e0e0e0;">
+                        <!-- Date Range Picker -->
+                        <div class="control-group" style="margin-bottom: 16px;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Date Range:</label>
+                            <div style="display: flex; gap: 12px; align-items: center;">
+                                <div style="flex: 1;">
+                                    <label style="display: block; margin-bottom: 4px; font-size: 12px; color: #666;">From Date:</label>
+                                    <input type="date" 
+                                           class="form-control" 
+                                           t-att-value="state.pricing_scenarios_start_date"
+                                           t-on-change="onPricingScenariosStartDateChange"
+                                           style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;"/>
+                                </div>
+                                <div style="flex: 1;">
+                                    <label style="display: block; margin-bottom: 4px; font-size: 12px; color: #666;">To Date:</label>
+                                    <input type="date" 
+                                           class="form-control" 
+                                           t-att-value="state.pricing_scenarios_end_date"
+                                           t-on-change="onPricingScenariosEndDateChange"
+                                           style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;"/>
+                                </div>
+                                <div style="flex: 0 0 auto;">
+                                    <button class="btn btn-primary" 
+                                            t-on-click="onPricingScenariosDateRangeChange"
+                                            t-att-disabled="!state.pricing_scenarios_start_date or !state.pricing_scenarios_end_date"
+                                            style="padding: 8px 16px; margin-top: 20px;">
+                                        Apply
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab Navigation -->
+                        <div class="tab-navigation" style="margin-bottom: 16px;">
+                            <button class="tab-button" 
+                                    t-att-class="state.pricing_scenarios_current_tab === 'break_even' ? 'active' : ''"
+                                    t-on-click="() => this.onPricingScenariosTabChange('break_even')">
+                                Break Even
+                            </button>
+                            <button class="tab-button" 
+                                    t-att-class="state.pricing_scenarios_current_tab === 'net_10k' ? 'active' : ''"
+                                    t-on-click="() => this.onPricingScenariosTabChange('net_10k')">
+                                +10,000 AED Net
+                            </button>
+                            <button class="tab-button" 
+                                    t-att-class="state.pricing_scenarios_current_tab === 'net_custom' ? 'active' : ''"
+                                    t-on-click="() => this.onPricingScenariosTabChange('net_custom')">
+                                +Custom Net
+                            </button>
+                        </div>
+
+                        <!-- Weighting Mode Toggle (for target scenarios) -->
+                        <div class="control-group" t-if="state.pricing_scenarios_current_tab !== 'break_even'" style="margin-bottom: 16px;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Uplift Method:</label>
+                            <div class="toggle-group">
+                                <button class="toggle-button" 
+                                        t-att-class="state.pricing_scenarios_weighting_mode === 'uniform' ? 'active' : ''"
+                                        t-on-click="() => this.onPricingScenariosWeightingModeChange('uniform')">
+                                    Uniform
+                                </button>
+                                <button class="toggle-button" 
+                                        t-att-class="state.pricing_scenarios_weighting_mode === 'weighted' ? 'active' : ''"
+                                        t-on-click="() => this.onPricingScenariosWeightingModeChange('weighted')">
+                                    Weighted
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Custom Target Input -->
+                        <div class="control-group" t-if="state.pricing_scenarios_current_tab === 'net_custom'" style="margin-bottom: 16px;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Target Net Profit (AED):</label>
+                            <div class="input-group">
+                                <input type="number" 
+                                       class="form-control" 
+                                       t-att-value="state.pricing_scenarios_custom_target"
+                                       t-on-change="(ev) => this.onPricingScenariosCustomTargetChange(ev.target.value)"
+                                       placeholder="Enter target amount"/>
+                                <button class="btn btn-primary" 
+                                        t-on-click="calculateCustomNetScenario"
+                                        t-att-disabled="state.pricing_scenarios_loading or state.pricing_scenarios_available_months.length === 0">
+                                    <i class="fa fa-calculator" t-if="!state.pricing_scenarios_loading"/>
+                                    <i class="fa fa-spinner fa-spin" t-if="state.pricing_scenarios_loading"/>
+                                    Calculate
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Summary Card -->
+                    <div class="pricing-summary" t-if="state.pricing_scenarios_data and state.pricing_scenarios_data.totals" style="padding: 16px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0;">
+                        <div class="summary-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
+                            <div class="summary-item">
+                                <div class="summary-label">Revenue (R)</div>
+                                <div class="summary-value" t-esc="formatPricingCurrency(state.pricing_scenarios_data.totals?.revenue || 0)"/>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-label">Gross Profit (G)</div>
+                                <div class="summary-value" t-esc="formatPricingCurrency(state.pricing_scenarios_data.totals?.gross_profit || 0)"/>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-label">Expenses (E)</div>
+                                <div class="summary-value" t-esc="formatPricingCurrency(state.pricing_scenarios_data.totals?.expenses || 0)"/>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-label">Net Profit (N)</div>
+                                <div class="summary-value" t-esc="formatPricingCurrency(state.pricing_scenarios_data.totals?.net_income || 0)"/>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-label">Min Uplift</div>
+                                <div class="summary-value" t-esc="formatPricingPercentage((state.pricing_scenarios_data.totals?.min_uplift || 0) * 100)"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- No Data Message -->
+                    <div class="no-data-message" t-if="!state.pricing_scenarios_data or !state.pricing_scenarios_data.totals" 
+                         style="padding: 32px; text-align: center; color: #666; background: #f8f9fa; border: 1px solid #e0e0e0; margin: 16px;">
+                        <i class="fa fa-info-circle" style="font-size: 24px; margin-bottom: 12px; display: block;"></i>
+                        <div style="font-size: 16px; margin-bottom: 8px;">No pricing scenarios data available</div>
+                        <div style="font-size: 14px;">Please select a date range and click Apply to calculate pricing scenarios.</div>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div class="error-message" t-if="state.pricing_scenarios_error" 
+                         style="padding: 32px; text-align: center; color: #721c24; background: #f8d7da; border: 1px solid #f5c6cb; margin: 16px; border-radius: 4px;">
+                        <i class="fa fa-exclamation-triangle" style="font-size: 24px; margin-bottom: 12px; display: block;"></i>
+                        <div style="font-size: 16px; margin-bottom: 8px; font-weight: 500;">Pricing Scenarios Error</div>
+                        <div style="font-size: 14px;" t-esc="state.pricing_scenarios_error"/>
+                        <div style="font-size: 12px; margin-top: 8px; color: #856404;">
+                            <strong>Note:</strong> The date range feature is currently not available. Please use the original month-based pricing scenarios instead.
+                        </div>
+                    </div>
+
+                    <!-- Banners -->
+                    <div class="pricing-banners" t-if="state.pricing_scenarios_data and state.pricing_scenarios_current_tab !== 'break_even'">
+                        <div class="banner" t-if="getCurrentScenarioMetadata() and getCurrentScenarioMetadata().unrealistic" 
+                             style="background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 12px; margin: 16px; border-radius: 4px;">
+                            <i class="fa fa-exclamation-triangle" style="margin-right: 8px;"></i>
+                            Target is unrealistic on last month's volumes. Consider growth actions.
+                        </div>
+                        <div class="banner" t-if="getCurrentScenarioMetadata() and getCurrentScenarioMetadata().x" 
+                             style="background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; padding: 12px; margin: 16px; border-radius: 4px;">
+                            <i class="fa fa-info-circle" style="margin-right: 8px;"></i>
+                            Required uniform uplift: <strong t-esc="formatPricingPercentage(getCurrentScenarioMetadata().x * 100)"/>
+                        </div>
+                        <div class="banner" t-if="getCurrentScenarioMetadata() and getCurrentScenarioMetadata().x_range" 
+                             style="background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; padding: 12px; margin: 16px; border-radius: 4px;">
+                            <i class="fa fa-info-circle" style="margin-right: 8px;"></i>
+                            Weighted uplift range: <strong t-esc="formatPricingPercentage(getCurrentScenarioMetadata().x_range[0])"/> to <strong t-esc="formatPricingPercentage(getCurrentScenarioMetadata().x_range[1])"/>
+                        </div>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div class="error-message" t-if="state.pricing_scenarios_error" 
+                         style="background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 12px; margin: 16px; border-radius: 4px;">
+                        <i class="fa fa-exclamation-circle" style="margin-right: 8px;"></i>
+                        <t t-esc="state.pricing_scenarios_error"/>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div class="loading-state" t-if="state.pricing_scenarios_loading" 
+                         style="text-align: center; padding: 40px;">
+                        <i class="fa fa-spinner fa-spin" style="font-size: 24px; color: #007bff;"></i>
+                        <div style="margin-top: 8px;">Loading pricing scenarios...</div>
+                    </div>
+
+                    <!-- Data Table -->
+                    <div class="pricing-table" t-if="state.pricing_scenarios_data and !state.pricing_scenarios_loading">
+                        <div style="max-height: 500px; overflow-y: auto;">
+                            <table class="modern-table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Qty</th>
+                                        <th>Cost</th>
+                                        <th>Real Price</th>
+                                        <th t-if="state.pricing_scenarios_current_tab === 'break_even'">Break-even Price</th>
+                                        <th t-if="state.pricing_scenarios_current_tab !== 'break_even'">Target Price</th>
+                                        <th t-if="state.pricing_scenarios_current_tab === 'break_even'">Diff</th>
+                                        <th t-if="state.pricing_scenarios_current_tab === 'break_even'">Diff %</th>
+                                        <th t-if="state.pricing_scenarios_current_tab !== 'break_even'">% Change</th>
+                                        <th t-if="state.pricing_scenarios_current_tab !== 'break_even'">Margin After</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="getCurrentScenarioData()" t-as="row" t-key="row_index">
+                                        <tr t-att-class="row.price_target &lt; row.cost ? 'below-cost' : (row.margin_after &lt; 2 ? 'near-cost' : '')">
+                                            <td><t t-esc="row.product"/></td>
+                                            <td><t t-esc="row.qty"/></td>
+                                            <td><t t-esc="formatPricingCurrency(row.cost)"/></td>
+                                            <td><t t-esc="formatPricingCurrency(row.price_real)"/></td>
+                                            <td><t t-esc="formatPricingCurrency(row.price_target)"/></td>
+                                            <t t-if="state.pricing_scenarios_current_tab === 'break_even'">
+                                                <td><t t-esc="formatPricingCurrency(row.diff)"/></td>
+                                                <td><t t-esc="formatPricingPercentage(row.diff_pct)"/></td>
+                                            </t>
+                                            <t t-if="state.pricing_scenarios_current_tab !== 'break_even'">
+                                                <td><t t-esc="formatPricingPercentage(row.pct)"/></td>
+                                                <td><t t-esc="formatPricingPercentage(row.margin_after)"/></td>
+                                            </t>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="pricing-actions" t-if="state.pricing_scenarios_data and !state.pricing_scenarios_loading and state.pricing_scenarios_current_tab !== 'break_even'" 
+                         style="padding: 16px; text-align: center; border-top: 1px solid #e0e0e0;">
+                        <button class="btn btn-info" 
+                                style="margin-right: 12px; padding: 10px 20px; font-size: 14px; font-weight: 500;"
+                                t-on-click="previewPricingChanges">
+                            <i class="fa fa-eye" style="margin-right: 6px;"></i>
+                            Preview Changes
+                        </button>
+                        <button class="btn btn-success" 
+                                style="padding: 12px 24px; font-size: 16px; font-weight: 500;"
+                                t-on-click="applyPricingChanges">
+                            <i class="fa fa-check" style="margin-right: 8px;"></i>
+                            Apply <t t-esc="state.pricing_scenarios_weighting_mode === 'uniform' ? 'Uniform' : 'Weighted'"/> Changes
+                        </button>
+                    </div>
+                </div>
+            </div>
                         </div>
     </t>
 </templates>

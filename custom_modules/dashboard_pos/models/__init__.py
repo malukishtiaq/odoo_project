@@ -20,3 +20,4 @@
 #
 ################################################################################
 from . import pos_order
+from . import pricing_price_list
