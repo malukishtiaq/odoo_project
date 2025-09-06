@@ -503,7 +503,7 @@
                                         </tr>
                                         </thead>
                                         <tbody>
-                            <t t-foreach="state.top_selling_product_pos" t-as="product" t-key="product.id_index">
+                            <t t-foreach="state.top_selling_product_pos" t-as="product" t-foreach-index="idxPos" t-key="idxPos">
                                 <tr>
                                     <td><t t-esc="product.product_name['en_US']"/></td>
                                     <td><t t-esc="product.total_quantity"/></td>
@@ -528,7 +528,7 @@
                                         </tr>
                                         </thead>
                                         <tbody>
-                            <t t-foreach="state.top_selling_product_inv" t-as="product" t-key="product.id_index">
+                            <t t-foreach="state.top_selling_product_inv" t-as="product" t-foreach-index="idxInv" t-key="idxInv">
                                 <tr>
                                     <td><t t-esc="product.product_name['en_US']"/></td>
                                     <td><t t-esc="product.total_quantity"/></td>
@@ -552,7 +552,7 @@
                                         </tr>
                                         </thead>
                                         <tbody>
-                            <t t-foreach="state.top_salesperson" t-as="salesperson" t-key="salesperson.id_index">
+                            <t t-foreach="state.top_salesperson" t-as="salesperson" t-foreach-index="idxSp" t-key="idxSp">
                                 <tr>
                                     <td><t t-esc="salesperson[0]"/></td>
                                     <td><t t-esc="salesperson[2]"/></td>
@@ -574,7 +574,7 @@
                                         </tr>
                                         </thead>
                                         <tbody>
-                            <t t-foreach="state.selling_product" t-as="session" t-key="session.id_index">
+                            <t t-foreach="state.selling_product" t-as="session" t-foreach-index="idxSess" t-key="idxSess">
                                 <tr>
                                     <td><t t-esc="session['session']"/></td>
                                     <td><t t-esc="session['status']"/></td>
@@ -595,7 +595,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                            <t t-foreach="state.payment_details" t-as="payment_method" t-key="payment_method.id_index">
+                            <t t-foreach="state.payment_details" t-as="payment_method" t-foreach-index="idxPay" t-key="idxPay">
                                 <tr>
                                     <td><t t-esc="payment_method[0]['en_US']"/></td>
                                     <td><t t-esc="payment_method[1]"/></td>
@@ -658,7 +658,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                             <t t-foreach="state.history_data" t-as="hd" t-key="hd.id_index">
+                                             <t t-foreach="state.history_data" t-as="hd" t-foreach-index="idxHist" t-key="idxHist">
                                                 <tr>
                                                     <td><t t-esc="hd.name"/></td>
                                                     <td><t t-esc="hd.sale"/></td>
