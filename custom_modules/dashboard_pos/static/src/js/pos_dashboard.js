@@ -531,7 +531,12 @@ export class PosDashboard extends Component {
   render_top_customer_graph() {
     //      To render the top customer pie chart
     var self = this
-    var ctx = $(".top_customer");
+    const canvas = document.querySelector('.top_customer');
+    if (!canvas) {
+      console.warn('top_customer canvas not found; skipping chart render');
+      return;
+    }
+    const ctx = canvas.getContext('2d');
     this.orm.call('pos.order', 'get_the_top_customer')
       .then(function (arrays) {
         var data = {
@@ -594,7 +599,12 @@ export class PosDashboard extends Component {
   render_top_product_graph() {
     //   To render the top product graph
     var self = this
-    var ctx = $(".top_selling_product");
+    const canvas = document.querySelector('.top_selling_product');
+    if (!canvas) {
+      console.warn('top_selling_product canvas not found; skipping chart render');
+      return;
+    }
+    const ctx = canvas.getContext('2d');
     this.orm.call('pos.order', 'get_the_top_products')
       .then(function (arrays) {
         var data = {

@@ -138,7 +138,7 @@
                         </div>
                         </div>
                     <div class="chart-container">
-                        <canvas id="canvas_1" width="400" height="200"></canvas>
+                        <canvas id="canvas_1" class="top_selling_product" width="400" height="200"></canvas>
                     </div>
                 </div>
 
